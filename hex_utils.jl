@@ -70,4 +70,9 @@ function rotate_lattice!(lattice, angle, pivot)
     end
 end
 
+function brillouin_zone(a)
+    a1 = [a, 0.0]
+    a2 = [a*cos(angle), a*sin(angle)]
+end
+
 end
