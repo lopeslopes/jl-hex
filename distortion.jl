@@ -5,6 +5,7 @@ pygui(:qt5)
 using PyPlot
 using NearestNeighbors
 using Printf
+using Base.Threads
 
 
 # INITIAL DEFINITIONS
@@ -62,15 +63,15 @@ treeB2 = KDTree(transpose(latB2))
 # DISTORTION OF ALL LAT2 BY THE SAME DIFF VECTOR
 # test_point = [ 33.20919997773677, 452.36422740621947]
 # test_point = [-41.82071381645537, 451.64503616874754]
-test_point = [ -2.46429740059443, 258.49122158850423]
+# test_point = [ -2.46429740059443, 258.49122158850423]
 
-ind_test, dist_test = knn(treeB1, test_point, 1)
-foundB1 = latB1[ind_test[1],:]
-ind_test, dist_test = knn(treeA2, test_point, 1)
-foundA2 = latA2[ind_test[1],:]
-
-diff = foundB1 - foundA2
-# diff = [0.0, 0.0]
+# ind_test, dist_test = knn(treeB1, test_point, 1)
+# foundB1 = latB1[ind_test[1],:]
+# ind_test, dist_test = knn(treeA2, test_point, 1)
+# foundA2 = latA2[ind_test[1],:]
+# 
+# diff = foundB1 - foundA2
+diff = [0.0, 0.0]
 
 latA2[:,1] = latA2[:,1] .+ diff[1]
 latA2[:,2] = latA2[:,2] .+ diff[2]
@@ -79,54 +80,53 @@ latB2[:,2] = latB2[:,2] .+ diff[2]
 
 # NEW OVERLAP TEST AFTER DISTORTION
 tol = 5.0e-3
+println("New overlap test after distortion starting...")
 println("Tolerance:        ", tol)
 
 treeA2 = KDTree(transpose(latA2))
 treeB2 = KDTree(transpose(latB2))
 
-aa = 0
-ba = 0
-ab = 0
-bb = 0
+AA = []
+BA = []
+AB = []
+BB = []
 
-latAA = zeros((div(n,2), 2))
-latAB = zeros((div(n,2), 2))
-latBA = zeros((div(n,2), 2))
-latBB = zeros((div(n,2), 2))
-
+#Threads.nthreads() = 6
+#@threads for i in 1:div(n,2)
 for i in 1:div(n,2)
     indAA, distAA = knn(treeA1, latA2[i,:], 1)
     indBA, distBA = knn(treeB1, latA2[i,:], 1)
     indAB, distAB = knn(treeA1, latB2[i,:], 1)
     indBB, distBB = knn(treeB1, latB2[i,:], 1)
     if distAA[1] < tol
-        global aa = aa + 1
-        latAA[aa,:] = latA2[i,:]
+        push!(AA, latA2[i,:])
     end
     if distBA[1] < tol
-        global ba = ba + 1
-        latBA[ba,:] = latA2[i,:]
+        push!(BA, latA2[i,:])
     end
     if distAB[1] < tol
-        global ab = ab + 1
-        latAB[ab,:] = latB2[i,:]
+        push!(AB, latB2[i,:])
     end
     if distBB[1] < tol
-        global bb = bb + 1
-        latBB[bb,:] = latB2[i,:]
+        push!(BB, latB2[i,:])
     end
 end
 
+latAA = hcat(AA...)
+latBA = hcat(BA...)
+latAB = hcat(AB...)
+latBB = hcat(BB...)
+
 # PLOT
 ax1 = subplot(111,aspect=1)
-ax1.scatter(latAA[1:aa,1], latAA[1:aa,2], color="blue")
-ax1.scatter(latBA[1:ba,1], latBA[1:ba,2], color="green")
-ax1.scatter(latAB[1:ab,1], latAB[1:ab,2], color="orange")
-ax1.scatter(latBB[1:bb,1], latBB[1:bb,2], color="red")
+ax1.scatter(latAA[1,:], latAA[2,:], color="blue")
+ax1.scatter(latBA[1,:], latBA[2,:], color="green")
+ax1.scatter(latAB[1,:], latAB[2,:], color="orange")
+ax1.scatter(latBB[1,:], latBB[2,:], color="red")
 
 # ax1.quiver(0.0, 0.0, foundA2[1], foundA2[2], angles="xy", scale_units="xy", scale=1)
 
-ax1.set_xlim([-2250, 2250])
-ax1.set_ylim([-2250, 2250])
+ax1.set_xlim([-2400, 2400])
+ax1.set_ylim([-2400, 2400])
 legend(["AA", "BA", "AB", "BB"])
 show()
