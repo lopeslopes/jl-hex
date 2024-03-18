@@ -80,11 +80,8 @@ latB2[:,2] = latB2[:,2] .+ diff[2]
 
 # NEW OVERLAP TEST AFTER DISTORTION
 tol = 5.0e-3
-println("Starting new overlap test after distortion...")
+println("Starting overlap test after distortion...")
 println("Tolerance:        ", tol)
-
-treeA2 = KDTree(transpose(latA2))
-treeB2 = KDTree(transpose(latB2))
 
 AA = []
 BA = []
@@ -126,7 +123,7 @@ ax1.scatter(latBB[:,1], latBB[:,2], color="red")
 
 ax1.quiver(0.0, 0.0, foundA2[1], foundA2[2], angles="xy", scale_units="xy", scale=1)
 
-ax1.set_xlim([-2400, 2400])
-ax1.set_ylim([-2400, 2400])
+# ax1.set_xlim([-2400, 2400])
+# ax1.set_ylim([-2400, 2400])
 legend(["AA", "BA", "AB", "BB"])
 show()

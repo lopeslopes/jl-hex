@@ -9,7 +9,7 @@ using Base.Threads
 
 
 # INITIAL DEFINITIONS
-n = 2000000
+n = 50000000
 a = 2.46
 origin1 = [0.0, 0.0]
 origin2 = [0.0, 0.0]
@@ -24,7 +24,7 @@ latB2 = zeros(n ÷ 2, 2)
 HexUtils.create_honeycomb_lattice!(latA1, latB1, a, false)
 HexUtils.create_honeycomb_lattice!(latA2, latB2, a, false)
 
-angle = 1.90495757117080288768798873954979561e-2
+angle = 1.91235783233762423239743767417441124e-2
 tol = 5.0e-3
 
 println("Tolerance:        ", tol)
@@ -70,7 +70,15 @@ latBA = transpose(hcat(BA...))
 latAB = transpose(hcat(AB...))
 latBB = transpose(hcat(BB...))
 
-#write_lattice(latA1, "latA1.dat")
-#write_lattice(transpose(latAA), "latAA.dat")
+name = @sprintf("%6.4f", tol)
 
-println(latAA[:,1])
+ax1 = subplot(111,aspect=1)
+ax1.scatter(latAA[:,1], latAA[:,2], s=10, color="blue")
+ax1.scatter(latBA[:,1], latBA[:,2], s=10, color="green")
+ax1.scatter(latAB[:,1], latAB[:,2], s=10, color="orange")
+ax1.scatter(latBB[:,1], latBB[:,2], s=10, color="red")
+
+# ax1.set_xlim([-2250, 2250])
+# ax1.set_ylim([-2250, 2250])
+legend(["AA", "BA", "AB", "BB"])
+savefig("results/1.9123/"*name*"_50M.png", format="png", dpi=500)
