@@ -8,7 +8,7 @@ using Printf
 
 
 # INITIAL DEFINITIONS
-n = 10000000
+n = 150000000
 a = 2.46
 hex_center_pivot = false
 AB_stacking = false
@@ -50,7 +50,7 @@ HexUtils.create_honeycomb_lattice!(latA2, latB2, a, AB_stacking)
 # angle = 1.91517084211538477391489120822979632e-2
 # angle = 1.91756277374731560763308567863988621e-2
 
-angle = 1.91756277374731560763308567863988621e-2
+angle = 1.91235783233762423239743767417441124e-2
 println("Angle in radians: ", angle)
 println("Angle in degrees: ", (angle * 180) / pi)
 
@@ -66,15 +66,11 @@ rotate_lattice!(latB2, angle, origin2)
 # TEST SECTION: TREES
 treeA1 = KDTree(transpose(latA1))
 treeB1 = KDTree(transpose(latB1))
-treeA2 = KDTree(transpose(latA2))
-treeB2 = KDTree(transpose(latB2))
+# treeA2 = KDTree(transpose(latA2))
+# treeB2 = KDTree(transpose(latB2))
 
-aa = 0
-ba = 0
-ab = 0
-bb = 0
 # TOLERANCE VARIATION
-tols = [1.0e-2, 5.0e-3, 1.0e-3, 5.0e-4, 1.0e-4]
+tols = [5.0e-3, 4.0e-3, 3.0e-3, 2.0e-3, 1.0e-3]
 for tol in tols
     println("Tolerance:        ", tol)
 
@@ -117,14 +113,14 @@ for tol in tols
 
     # PLOT
     ax1 = subplot(111,aspect=1)
-    ax1.scatter(latAA[:,1], latAA[:,2], color="blue")
-    ax1.scatter(latBA[:,1], latBA[:,2], color="green")
-    ax1.scatter(latAB[:,1], latAB[:,2], color="orange")
-    ax1.scatter(latBB[:,1], latBB[:,2], color="red")
+    ax1.scatter(latAA[:,1], latAA[:,2], s=1, color="blue")
+    ax1.scatter(latBA[:,1], latBA[:,2], s=1, color="green")
+    ax1.scatter(latAB[:,1], latAB[:,2], s=1, color="orange")
+    ax1.scatter(latBB[:,1], latBB[:,2], s=1, color="red")
 
-    ax1.set_xlim([-2250, 2250])
-    ax1.set_ylim([-2250, 2250])
+    ax1.set_xlim([-12250, 12250])
+    ax1.set_ylim([-12250, 12250])
     legend(["AA", "BA", "AB", "BB"])
-    savefig("results/1.9175/"*name*".png", format="png", dpi=300)
+    savefig("results/1.9123/150M/"*name*"_150M.png", format="png", dpi=550)
     clf()
 end
