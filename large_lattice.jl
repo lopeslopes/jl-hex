@@ -9,7 +9,7 @@ using Base.Threads
 
 
 # INITIAL DEFINITIONS
-n = 200000000
+n = 20000000
 a = 2.46
 origin1 = [0.0, 0.0]
 origin2 = [0.0, 0.0]
@@ -35,7 +35,6 @@ println("Angle in degrees: ", (angle * 180) / pi)
 rotate_lattice!(latA2, angle, origin2)
 rotate_lattice!(latB2, angle, origin2)
 
-# TEST SECTION: TREES
 treeA1 = KDTree(transpose(latA1))
 treeB1 = KDTree(transpose(latB1))
 

@@ -1,5 +1,5 @@
 module HexUtils
-export create_honeycomb_lattice!, write_lattice, rotate_lattice!
+export create_honeycomb_lattice!, write_lattice, rotate_lattice!, read_lattice
 
 function create_honeycomb_lattice!(latticeA::Array{Float64,2}, latticeB::Array{Float64,2}, a::Float64, ab_stacking::Bool)
     num_columns = 2*div(isqrt(size(latticeA,1)*2),3)
@@ -70,9 +70,20 @@ function rotate_lattice!(lattice, angle, pivot)
     end
 end
 
-function brillouin_zone(a)
-    a1 = [a, 0.0]
-    a2 = [a*cos(angle), a*sin(angle)]
+function read_lattice(filename)
+    lat = []
+    open(filename, "r") do file
+        data = readlines(file)
+        for line in data
+            if line != "\n"
+                aux = split(line, ";")
+                aux_v = [parse(Float64, aux[1]), parse(Float64, aux[2])]
+                push!(lat, aux_v)
+            end
+        end
+    end
+    lat = transpose(hcat(lat...))
+    return lat
 end
 
 end
