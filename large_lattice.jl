@@ -9,7 +9,7 @@ using Base.Threads
 
 
 # INITIAL DEFINITIONS
-n = 20000000
+n = 2000000
 a = 2.46
 origin1 = [0.0, 0.0]
 origin2 = [0.0, 0.0]
@@ -25,7 +25,7 @@ HexUtils.create_honeycomb_lattice!(latA1, latB1, a, false)
 HexUtils.create_honeycomb_lattice!(latA2, latB2, a, false)
 
 angle = 1.91517084211538477391489120822979632e-2
-tol = 5.0e-3
+tol = 1.0e-2
 
 println("Tolerance:        ", tol)
 println("Angle in radians: ", angle)
@@ -76,4 +76,4 @@ ax1.scatter(latAB[:,1], latAB[:,2], s=1, color="orange")
 ax1.scatter(latBB[:,1], latBB[:,2], s=1, color="red")
 
 legend(["AA", "BA", "AB", "BB"])
-savefig("results/1.9151/"*tol_str*"_200M.png", format="png", dpi=550)
+savefig("results/1.9151/"*tol_str*"_2M.png", format="png", dpi=550)
