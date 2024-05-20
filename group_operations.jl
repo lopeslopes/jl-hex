@@ -18,13 +18,29 @@ latAB = read_lattice("data/0.0191434/"*name*"_AB.dat")
 latBB = read_lattice("data/0.0191434/"*name*"_BB.dat")
 
 treeAB = KDTree(transpose(latAB))
-ind, dist = knn(treeAB, origin, 10)
-point = latAB[ind[10],:]
-println(point)
+ind, dist = knn(treeAB, origin, 1000)
+lenBB = size(latBB)[1]
+println(lenBB)
 
-slope = point[2]/point[1]
+slope_final = 0.0
+for i in 1:1000
+    point = latAB[ind[i],:]
+    slope = point[2]/point[1]
+    for j in 1:lenBB
+        y_slope = latBB[j,1]*slope
+        diff = abs(latBB[j,2]-y_slope)
+        if diff<0.1
+            println(i, point)
+            println("    ", j, " ", diff)
+            point_final = point
+            global slope_final = point_final[2]/point_final[1]
+            println(slope_final)
+        end
+    end
+end
+
 x_vals = -12500:12500
-y_vals = slope*x_vals
+y_vals = slope_final*x_vals
 
 ax1 = subplot(111, aspect=1)
 ax1.scatter(latAA[:,1], latAA[:,2], color="green", s=8)
