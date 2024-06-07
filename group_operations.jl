@@ -18,29 +18,36 @@ latAB = read_lattice("data/0.0191434/"*name*"_AB.dat")
 latBB = read_lattice("data/0.0191434/"*name*"_BB.dat")
 
 treeAB = KDTree(transpose(latAB))
-ind, dist = knn(treeAB, origin, 1000)
+ind, dist = knn(treeAB, origin, 500)
 lenBB = size(latBB)[1]
+lenBA = size(latBA)[1]
 
 # FINDING POINTS THAT ALIGN
 point_AB = [0.0, 0.0]
 point_BB = [0.0, 0.0]
+point_BA = [0.0, 0.0]
 slope_final = 0.0
-for i in 1:1000
+for i in 1:500
     point = latAB[ind[i],:]
     slope = point[2]/point[1]
     for j in 1:lenBB
         y_slope = latBB[j,1]*slope
         diff = abs(latBB[j,2]-y_slope)
-        if diff<0.1
-            # println("AB point: ", point)
-            # println("    index:  ", i)
-            # println("BB point: ", latBB[j,:])
-            # println("    index:  ", j)
+        if diff<1
             println("    diff: ", diff)
             global point_AB = point
             global point_BB = latBB[j,:]
             global slope_final = point_AB[2]/point_AB[1]
             println("Slope of line: ", slope_final)
+            # TEST BA POINTS TOO
+            for k in 1:lenBA
+                y_BA_slope = latBA[k,1]*slope
+                diff_BA = abs(latBA[k,2]-y_BA_slope)
+                if diff_BA<1
+                    println("    diffBA: ", diff_BA)
+                    global point_BA = latBA[k,:]
+                end
+            end
         end
     end
 end
@@ -97,12 +104,14 @@ ax1.scatter(0.0, 0.0, color="green", s=50)
 ax1.scatter(point_AB[1], point_AB[2], color="magenta", s=50)
 ax1.scatter(point_BB[1], point_BB[2], color="purple", s=50)
 
+ax1.scatter(point_BA[1], point_BA[2], color="cyan", s=50)
+
 # PLOTTING LINE
 ax1.plot(x_vals, y_vals)
 
 # SETTING PLOT LIMITS AND LEGEND
 ax1.set_xlim([-12250, 12250])
 ax1.set_ylim([-12250, 12250])
-legend(["AA", "BA", "AB", "BB", "selected AA", "selected AB", "selected BB"])
+legend(["AA", "BA", "AB", "BB", "selected AA", "selected AB", "selected BB", "selected_BA"])
 
 show()
