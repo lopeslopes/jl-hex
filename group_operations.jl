@@ -12,10 +12,10 @@ tol = 5.0e-3
 name = @sprintf("%6.4f", tol)
 origin = [0.0, 0.0]
 
-latAA = read_lattice("data/0.0191434/240M_"*name*"_AA.dat")
-latBA = read_lattice("data/0.0191434/240M_"*name*"_BA.dat")
-latAB = read_lattice("data/0.0191434/240M_"*name*"_AB.dat")
-latBB = read_lattice("data/0.0191434/240M_"*name*"_BB.dat")
+latAA = read_lattice("data/0.0191434/"*name*"_AA.dat")
+latBA = read_lattice("data/0.0191434/"*name*"_BA.dat")
+latAB = read_lattice("data/0.0191434/"*name*"_AB.dat")
+latBB = read_lattice("data/0.0191434/"*name*"_BB.dat")
 
 treeAB = KDTree(transpose(latAB))
 ind, dist = knn(treeAB, origin, 1000)
