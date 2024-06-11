@@ -5,7 +5,7 @@ using Printf
 
 
 # INITIAL DEFINITIONS
-n = 500000000
+n = 1000000000
 a = 2.46
 hex_center_pivot = false
 AB_stacking = false
@@ -85,7 +85,7 @@ latBB = transpose(hcat(BB...))
 
 name = @sprintf("%6.4f", tol)
 
-write_lattice(latAA, "data/0.0191434/500M_"*name*"_AA.dat")
-write_lattice(latBA, "data/0.0191434/500M_"*name*"_BA.dat")
-write_lattice(latAB, "data/0.0191434/500M_"*name*"_AB.dat")
-write_lattice(latBB, "data/0.0191434/500M_"*name*"_BB.dat")
+write_lattice(latAA, "data/0.0191434/1B_"*name*"_AA.dat")
+write_lattice(latBA, "data/0.0191434/1B_"*name*"_BA.dat")
+write_lattice(latAB, "data/0.0191434/1B_"*name*"_AB.dat")
+write_lattice(latBB, "data/0.0191434/1B_"*name*"_BB.dat")

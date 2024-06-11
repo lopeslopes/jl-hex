@@ -12,10 +12,10 @@ tol = 5.0e-3
 name = @sprintf("%6.4f", tol)
 origin = [0.0, 0.0]
 
-latAA = read_lattice("data/0.0191434/"*name*"_AA.dat")
-latBA = read_lattice("data/0.0191434/"*name*"_BA.dat")
-latAB = read_lattice("data/0.0191434/"*name*"_AB.dat")
-latBB = read_lattice("data/0.0191434/"*name*"_BB.dat")
+latAA = read_lattice("data/0.0191434/500M_"*name*"_AA.dat")
+latBA = read_lattice("data/0.0191434/500M_"*name*"_BA.dat")
+latAB = read_lattice("data/0.0191434/500M_"*name*"_AB.dat")
+latBB = read_lattice("data/0.0191434/500M_"*name*"_BB.dat")
 
 lenAB = size(latAB)[1]
 lenBA = size(latBA)[1]
@@ -35,7 +35,7 @@ for i in 1:lenAA
     point = latAA[ind[i],:]
     slope = point[2]/point[1]
     dAA = sqrt(point[1]^2 + point[2]^2)
-    if dAA>900
+    if slope>1.0
         for j in 1:lenBB
             y_slope = latBB[j,1]*slope
             diff_BB = abs(latBB[j,2]-y_slope)
@@ -128,7 +128,7 @@ println("    Point obtained with lattice vectors: ", BA_test)
 dist_BA = sqrt(point_BA[1]^2 + point_BA[2]^2)
 println("    Distance from origin: ", dist_BA)
 # LINE CROSSING AA, AB AND BB POINTS
-x_vals = -15000:15000
+x_vals = -20000:20000
 y_vals = slope_final*x_vals
 
 # PLOTTING ALL AA, BA, AB AND BB POINTS
@@ -149,8 +149,8 @@ ax1.scatter(point_AB[1], point_AB[2], color="orange", s=50)
 ax1.plot(x_vals, y_vals)
 
 # SETTING PLOT LIMITS AND LEGEND
-ax1.set_xlim([-14000, 14000])
-ax1.set_ylim([-14000, 14000])
+ax1.set_xlim([-18000, 18000])
+ax1.set_ylim([-18000, 18000])
 legend(["AA", "BA", "AB", "BB", "origin AA", "next AA", "selected BB", "selected BA", "selected AB"])
 
 show()
