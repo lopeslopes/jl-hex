@@ -47,12 +47,18 @@ println("Angle in degrees: ", (angle * 180) / pi)
 rotate_lattice!(latA2, angle, origin2)
 rotate_lattice!(latB2, angle, origin2)
 
+tol = 5.0e-3
+println("Tolerance:        ", tol)
+name = @sprintf("%6.4f", tol)
+
+write_lattice(latA1, "data/0.0191434/1B_"*name*"_A1.dat")
+write_lattice(latB1, "data/0.0191434/1B_"*name*"_B1.dat")
+write_lattice(latA2, "data/0.0191434/1B_"*name*"_A2.dat")
+write_lattice(latB2, "data/0.0191434/1B_"*name*"_B2.dat")
+
 # TESTING TREES
 treeA1 = KDTree(transpose(latA1))
 treeB1 = KDTree(transpose(latB1))
-
-tol = 5.0e-3
-println("Tolerance:        ", tol)
 
 AA = []
 BA = []
@@ -83,7 +89,6 @@ latBA = transpose(hcat(BA...))
 latAB = transpose(hcat(AB...))
 latBB = transpose(hcat(BB...))
 
-name = @sprintf("%6.4f", tol)
 
 write_lattice(latAA, "data/0.0191434/1B_"*name*"_AA.dat")
 write_lattice(latBA, "data/0.0191434/1B_"*name*"_BA.dat")
