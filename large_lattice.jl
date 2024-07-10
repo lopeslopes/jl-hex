@@ -5,7 +5,7 @@ using Printf
 
 
 # INITIAL DEFINITIONS
-n = 1000000000
+n = 200000000
 a = 2.46
 hex_center_pivot = false
 AB_stacking = false
@@ -37,60 +37,81 @@ latA2 = zeros(n ÷ 2, 2)
 latB2 = zeros(n ÷ 2, 2)
 
 HexUtils.create_honeycomb_lattice!(latA1, latB1, a, false)
-HexUtils.create_honeycomb_lattice!(latA2, latB2, a, AB_stacking)
 
-angle = 0.01914345108312343
-println("Angle in radians: ", angle)
-println("Angle in degrees: ", (angle * 180) / pi)
+ind_angle = 29
+aux1 = acos((3.0*ind_angle^2+3.0*ind_angle+0.5)/(3.0*ind_angle*ind_angle+3.0*ind_angle+1.0))
+ind_angle = 30
+aux2 = acos((3.0*ind_angle^2+3.0*ind_angle+0.5)/(3.0*ind_angle*ind_angle+3.0*ind_angle+1.0))
 
-# ROTATE SECOND LATTICE BY THE ANGLE
-rotate_lattice!(latA2, angle, origin2)
-rotate_lattice!(latB2, angle, origin2)
-
-tol = 5.0e-3
-println("Tolerance:        ", tol)
-name = @sprintf("%6.4f", tol)
-
-write_lattice(latA1, "data/0.0191434/1B_"*name*"_A1.dat")
-write_lattice(latB1, "data/0.0191434/1B_"*name*"_B1.dat")
-write_lattice(latA2, "data/0.0191434/1B_"*name*"_A2.dat")
-write_lattice(latB2, "data/0.0191434/1B_"*name*"_B2.dat")
-
-# TESTING TREES
 treeA1 = KDTree(transpose(latA1))
 treeB1 = KDTree(transpose(latB1))
+for m in [0,24]
+    HexUtils.create_honeycomb_lattice!(latA2, latB2, a, AB_stacking)
 
-AA = []
-BA = []
-AB = []
-BB = []
+    angle = aux2 + m*(aux1 - aux2)/24
 
-for i in 1:div(n,2)
-    indAA, distAA = knn(treeA1, latA2[i,:], 1)
-    indBA, distBA = knn(treeB1, latA2[i,:], 1)
-    indAB, distAB = knn(treeA1, latB2[i,:], 1)
-    indBB, distBB = knn(treeB1, latB2[i,:], 1)
-    if distAA[1] < tol
-        push!(AA, latA2[i,:])
+    println("Angle in radians: ", angle)
+    println("Angle in degrees: ", (angle * 180) / pi)
+    
+    ang_name = @sprintf("%9.7f", angle)
+    
+    # ROTATE SECOND LATTICE BY THE ANGLE
+    rotate_lattice!(latA2, angle, origin2)
+    rotate_lattice!(latB2, angle, origin2)
+    
+    tol = 1.0e-2
+    println("Tolerance:        ", tol)
+    name = @sprintf("%6.4f", tol)
+    
+    AA = []
+    BA = []
+    AB = []
+    BB = []
+    
+    for i in 1:div(n,2)
+        indAA, distAA = knn(treeA1, latA2[i,:], 1)
+        indBA, distBA = knn(treeB1, latA2[i,:], 1)
+        indAB, distAB = knn(treeA1, latB2[i,:], 1)
+        indBB, distBB = knn(treeB1, latB2[i,:], 1)
+        if distAA[1] < tol
+            push!(AA, latA2[i,:])
+        end
+        if distBA[1] < tol
+            push!(BA, latA2[i,:])
+        end
+        if distAB[1] < tol
+            push!(AB, latB2[i,:])
+        end
+        if distBB[1] < tol
+            push!(BB, latB2[i,:])
+        end
     end
-    if distBA[1] < tol
-        push!(BA, latA2[i,:])
+    
+    latAA = transpose(hcat(AA...))
+    latBA = transpose(hcat(BA...))
+    latAB = transpose(hcat(AB...))
+    latBB = transpose(hcat(BB...))
+    
+    mkdir("data/"*ang_name*"_0.01")
+    
+    try
+        write_lattice(latAA, "data/"*ang_name*"_0.01/200M_"*name*"_AA.dat")
+    catch e
+        println("AA lattice is empty!")
     end
-    if distAB[1] < tol
-        push!(AB, latB2[i,:])
+    try
+        write_lattice(latBA, "data/"*ang_name*"_0.01/200M_"*name*"_BA.dat")
+    catch e
+        println("BA lattice is empty!")
     end
-    if distBB[1] < tol
-        push!(BB, latB2[i,:])
+    try
+        write_lattice(latAB, "data/"*ang_name*"_0.01/200M_"*name*"_AB.dat")
+    catch e
+        println("AB lattice is empty!")
+    end
+    try
+        write_lattice(latBB, "data/"*ang_name*"_0.01/200M_"*name*"_BB.dat")
+    catch e
+        println("BB lattice is empty!")
     end
 end
-
-latAA = transpose(hcat(AA...))
-latBA = transpose(hcat(BA...))
-latAB = transpose(hcat(AB...))
-latBB = transpose(hcat(BB...))
-
-
-write_lattice(latAA, "data/0.0191434/1B_"*name*"_AA.dat")
-write_lattice(latBA, "data/0.0191434/1B_"*name*"_BA.dat")
-write_lattice(latAB, "data/0.0191434/1B_"*name*"_AB.dat")
-write_lattice(latBB, "data/0.0191434/1B_"*name*"_BB.dat")

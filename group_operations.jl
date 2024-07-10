@@ -12,10 +12,10 @@ tol = 5.0e-3
 name = @sprintf("%6.4f", tol)
 origin = [0.0, 0.0]
 
-latAA = read_lattice("data/0.0191434/500M_"*name*"_AA.dat")
-latBA = read_lattice("data/0.0191434/500M_"*name*"_BA.dat")
-latAB = read_lattice("data/0.0191434/500M_"*name*"_AB.dat")
-latBB = read_lattice("data/0.0191434/500M_"*name*"_BB.dat")
+latAA = read_lattice("data/0.0191434/1B_"*name*"_AA.dat")
+latBA = read_lattice("data/0.0191434/1B_"*name*"_BA.dat")
+latAB = read_lattice("data/0.0191434/1B_"*name*"_AB.dat")
+latBB = read_lattice("data/0.0191434/1B_"*name*"_BB.dat")
 
 lenAB = size(latAB)[1]
 lenBA = size(latBA)[1]
@@ -103,7 +103,7 @@ println("    Point obtained with lattice vectors: ", BA_test)
 dist_BA = sqrt(point_BA[1]^2 + point_BA[2]^2)
 println("    Distance from origin: ", dist_BA)
 # LINE CROSSING AA, AB AND BB POINTS
-x_vals = -20000:20000
+x_vals = -30000:30000
 y_vals = slope_final*x_vals
 
 # PLOTTING ALL AA, BA, AB AND BB POINTS
@@ -123,8 +123,8 @@ ax1.scatter(point_BA[1], point_BA[2], color="red", s=50)
 ax1.plot(x_vals, y_vals)
 
 # SETTING PLOT LIMITS AND LEGEND
-ax1.set_xlim([-18000, 18000])
-ax1.set_ylim([-18000, 18000])
+ax1.set_xlim([-40000, 40000])
+ax1.set_ylim([-40000, 40000])
 legend(["AA", "BA", "AB", "BB", "selected AA", "selected AB", "selected BB", "selected_BA"])
 
 show()

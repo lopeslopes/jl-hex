@@ -45,10 +45,10 @@ function create_honeycomb_lattice!(latticeA::Array{Float64,2}, latticeB::Array{F
     latticeB[:,2] = latticeB[:,2] .- lat_origin[2]
     
     if (ab_stacking)
-        latticeA[:,1] = latticeA[:,1] .+ d1[1]
-        latticeA[:,2] = latticeA[:,2] .+ d1[2]
-        latticeB[:,1] = latticeB[:,1] .+ d1[1]
-        latticeB[:,2] = latticeB[:,2] .+ d1[2]
+        latticeA[:,1] = latticeA[:,1] .- d1[1]
+        latticeA[:,2] = latticeA[:,2] .- d1[2]
+        latticeB[:,1] = latticeB[:,1] .- d1[1]
+        latticeB[:,2] = latticeB[:,2] .- d1[2]
     end
 end
 
