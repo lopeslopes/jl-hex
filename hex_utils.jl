@@ -1,5 +1,9 @@
 module HexUtils
-export create_honeycomb_lattice!, write_lattice, rotate_lattice!, read_lattice, rotate_3d, sym_op_d6h
+
+using LinearAlgebra: inv
+
+export create_honeycomb_lattice!, write_lattice, rotate_lattice!, read_lattice, rotate_3d, sym_op_d6h, cartesian_to_fractional
+
 
 function create_honeycomb_lattice!(latticeA::Array{Float64,2}, latticeB::Array{Float64,2}, a::Float64, ab_stacking::Bool)
     num_columns = 2*div(isqrt(size(latticeA,1)*2),3)
@@ -229,6 +233,16 @@ function sym_op_d6h(point, operation)
     point_3d = rot_matrix * point_3d
     new_point = [point_3d[1], point_3d[2]]
     return new_point
+end
+
+function cartesian_to_fractional(lattice, cartesian_positions)
+    lattice_inv = inv(lattice)
+    fractional_positions = []
+    for pos in cartesian_positions
+        frac_pos = lattice_inv * pos
+        push!(fractional_positions, frac_pos)
+    end
+    return fractional_positions
 end
 
 end

@@ -41,14 +41,14 @@ name = @sprintf("%6.4f", tol)
 
 # ALLOCATION OF LATTICES AND FIRST CREATION
 println("Creating bottom lattices...")
-latA1 = zeros(n ÷ 2, 3)
-latB1 = zeros(n ÷ 2, 3)
+latA1 = zeros(n ÷ 2, 2)
+latB1 = zeros(n ÷ 2, 2)
 
 HexUtils.create_honeycomb_lattice!(latA1[:,1:2], latB1[:,1:2], a, false)
 
 #println("Creating top lattices...")
-#latA2 = zeros(n ÷ 2, 3)
-#latB2 = zeros(n ÷ 2, 3)
+#latA2 = zeros(n ÷ 2, 2)
+#latB2 = zeros(n ÷ 2, 2)
 #
 #HexUtils.create_honeycomb_lattice!(latA2[:,1:2], latB2[:,1:2], a, AB_stacking)
 #
@@ -64,14 +64,16 @@ lenA1 = size(latA1)[1]
 typeA1 = ones(Int64, lenA1)
 println("Lattices created, starting symmetry calculation")
 
-a = 2.46
 lat_angle = pi/3.0
 a1 = [a, 0.0, 0.0]
 a2 = [a*cos(lat_angle), a*sin(lat_angle), 0.0]
-a3 = [0.0, 0.0, 0.0]
+a3 = [0.0, 0.0, 1.0]
+
+# CONVERTING CARTESIAN TO FRACTIONAL COORDINATES
+latA1_frac = cartesian_to_fractional(hcat(a1,a2,a3)..., latA1)
 
 test_lat = Lattice([a1,a2,a3])
-test_cell = Cell(test_lat, latA1, typeA1)
+test_cell = Cell(test_lat, latA1_frac, typeA1)
 test = get_symmetry(test_cell)
 
 println(test)
