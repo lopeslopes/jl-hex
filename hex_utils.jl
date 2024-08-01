@@ -2,7 +2,7 @@ module HexUtils
 
 using LinearAlgebra: inv
 
-export create_honeycomb_lattice!, write_lattice, rotate_lattice!, read_lattice, rotate_3d, sym_op_d6h, cartesian_to_fractional
+export create_honeycomb_lattice!, create_honeycomb_lattice_fractional!, write_lattice, rotate_lattice!, read_lattice, rotate_3d, sym_op_d6h, cartesian_to_fractional
 
 
 function create_honeycomb_lattice!(latticeA::Array{Float64,2}, latticeB::Array{Float64,2}, a::Float64, ab_stacking::Bool)
@@ -54,6 +54,51 @@ function create_honeycomb_lattice!(latticeA::Array{Float64,2}, latticeB::Array{F
         latticeB[:,1] = latticeB[:,1] .- d1[1]
         latticeB[:,2] = latticeB[:,2] .- d1[2]
     end
+end
+
+function create_honeycomb_lattice_fractional!(latticeA::Array{Float64,2}, latticeB::Array{Float64,2}, a::Float64, ab_stacking::Bool)
+    num_columns = 2*div(isqrt(size(latticeA,1)*2),3)
+    #d = sqrt((a^2)/(2.0*(1.0-cos(2.0*angle))))
+    #d1 = [d*cos(angle/2.0), d*sin(angle/2.0)]
+
+    origin_a = [0.0, 0.0]
+    origin_b = [0.0, 0.0] #origin_a + d1
+
+    row = 1
+    i = 1
+    while(i < size(latticeA,1))
+        for j=1:num_columns
+            if (i > size(latticeA,1))
+                break
+            end
+            latticeA[i,:] = [origin_a[1] + Float64(j-1), origin_a[2]]
+            latticeB[i,:] = [origin_b[1] + Float64(j-1), origin_b[2]]
+            i = i + 1
+        end
+        row  = row + 1
+        if (row % 2 == 1)
+            origin_a = origin_a + [0.0, 1.0]
+            origin_b = origin_b + [0.0, 1.0]
+        else
+            origin_a = origin_a + [-1.0, 1.0]
+            origin_b = origin_b + [-1.0, 1.0]
+        end
+    end
+
+    i0 = div((row ÷ 2) * num_columns + div(num_columns,2), 1)
+    lat_origin = latticeA[i0,:]
+
+    #latticeA[:,1] = latticeA[:,1] .- lat_origin[1]
+    #latticeA[:,2] = latticeA[:,2] .- lat_origin[2]
+    #latticeB[:,1] = latticeB[:,1] .- lat_origin[1]
+    #latticeB[:,2] = latticeB[:,2] .- lat_origin[2]
+    
+    #if (ab_stacking)
+    #    latticeA[:,1] = latticeA[:,1] .- d1[1]
+    #    latticeA[:,2] = latticeA[:,2] .- d1[2]
+    #    latticeB[:,1] = latticeB[:,1] .- d1[1]
+    #    latticeB[:,2] = latticeB[:,2] .- d1[2]
+    #end
 end
 
 function write_lattice(lattice, filename)

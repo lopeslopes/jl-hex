@@ -5,14 +5,16 @@ pygui(:qt5)
 using PyPlot
 using NearestNeighbors
 using Printf
-using Spglib
+
+ase = pyimport("ase")
+spglib = pyimport("spglib")
 
 tol = 5.0e-3
 name = @sprintf("%6.4f", tol)
 origin = [0.0, 0.0]
 
 # INITIAL DEFINITIONS
-n = 5000
+n = 200
 a = 2.46
 hex_center_pivot = false
 AB_stacking = true
@@ -44,7 +46,7 @@ println("Creating bottom lattices...")
 latA1 = zeros(n ÷ 2, 2)
 latB1 = zeros(n ÷ 2, 2)
 
-HexUtils.create_honeycomb_lattice!(latA1[:,1:2], latB1[:,1:2], a, false)
+HexUtils.create_honeycomb_lattice_fractional!(latA1, latB1, a, false)
 
 #println("Creating top lattices...")
 #latA2 = zeros(n ÷ 2, 2)
@@ -70,10 +72,14 @@ a2 = [a*cos(lat_angle), a*sin(lat_angle), 0.0]
 a3 = [0.0, 0.0, 1.0]
 
 # CONVERTING CARTESIAN TO FRACTIONAL COORDINATES
-latA1_frac = cartesian_to_fractional(hcat(a1,a2,a3)..., latA1)
+#latA1_frac = cartesian_to_fractional(hcat(a1,a2,a3)..., latA1)
+latA1_3d = zeros(n ÷ 2, 3)
+for i=1:lenA1
+    latA1_3d[i,:] = [latA1[i,1], latA1[i,2], 0.0]
+end
 
-test_lat = Lattice([a1,a2,a3])
-test_cell = Cell(test_lat, latA1_frac, typeA1)
-test = get_symmetry(test_cell)
-
-println(test)
+test_lat = spglib.Lattice([a1,a2,a3])
+test_cell = spglib.Cell(test_lat, latA1_3d, typeA1)
+println(test_lat)
+println(test_cell)
+test = spglib.get_symmetry(test_cell)
