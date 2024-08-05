@@ -38,80 +38,80 @@ latB2 = zeros(n ÷ 2, 2)
 
 HexUtils.create_honeycomb_lattice!(latA1, latB1, a, false)
 
-ind_angle = 29
-aux1 = acos((3.0*ind_angle^2+3.0*ind_angle+0.5)/(3.0*ind_angle*ind_angle+3.0*ind_angle+1.0))
-ind_angle = 30
-aux2 = acos((3.0*ind_angle^2+3.0*ind_angle+0.5)/(3.0*ind_angle*ind_angle+3.0*ind_angle+1.0))
+# ind_angle = 29
+# aux1 = acos((3.0*ind_angle^2+3.0*ind_angle+0.5)/(3.0*ind_angle*ind_angle+3.0*ind_angle+1.0))
+# ind_angle = 30
+# aux2 = acos((3.0*ind_angle^2+3.0*ind_angle+0.5)/(3.0*ind_angle*ind_angle+3.0*ind_angle+1.0))
 
 treeA1 = KDTree(transpose(latA1))
 treeB1 = KDTree(transpose(latB1))
-for m in [0,24]
-    HexUtils.create_honeycomb_lattice!(latA2, latB2, a, AB_stacking)
+# for m in [0,24]
+HexUtils.create_honeycomb_lattice!(latA2, latB2, a, AB_stacking)
 
-    angle = aux2 + m*(aux1 - aux2)/24
+angle = 0.01914345108312343
+# angle = aux2 + m*(aux1 - aux2)/24
 
-    println("Angle in radians: ", angle)
-    println("Angle in degrees: ", (angle * 180) / pi)
-    
-    ang_name = @sprintf("%9.7f", angle)
-    
-    # ROTATE SECOND LATTICE BY THE ANGLE
-    rotate_lattice!(latA2, angle, origin2)
-    rotate_lattice!(latB2, angle, origin2)
-    
-    tol = 1.0e-2
-    println("Tolerance:        ", tol)
-    name = @sprintf("%6.4f", tol)
-    
-    AA = []
-    BA = []
-    AB = []
-    BB = []
-    
-    for i in 1:div(n,2)
-        indAA, distAA = knn(treeA1, latA2[i,:], 1)
-        indBA, distBA = knn(treeB1, latA2[i,:], 1)
-        indAB, distAB = knn(treeA1, latB2[i,:], 1)
-        indBB, distBB = knn(treeB1, latB2[i,:], 1)
-        if distAA[1] < tol
-            push!(AA, latA2[i,:])
-        end
-        if distBA[1] < tol
-            push!(BA, latA2[i,:])
-        end
-        if distAB[1] < tol
-            push!(AB, latB2[i,:])
-        end
-        if distBB[1] < tol
-            push!(BB, latB2[i,:])
-        end
+println("Angle in radians: ", angle)
+println("Angle in degrees: ", (angle * 180) / pi)
+
+ang_name = @sprintf("%9.7f", angle)
+
+# ROTATE SECOND LATTICE BY THE ANGLE
+rotate_lattice!(latA2, angle, origin2)
+rotate_lattice!(latB2, angle, origin2)
+
+tol = 1.0e-3
+println("Tolerance:        ", tol)
+name = @sprintf("%6.4f", tol)
+
+AA = []
+BA = []
+AB = []
+BB = []
+
+for i in 1:div(n,2)
+    indAA, distAA = knn(treeA1, latA2[i,:], 1)
+    indBA, distBA = knn(treeB1, latA2[i,:], 1)
+    indAB, distAB = knn(treeA1, latB2[i,:], 1)
+    indBB, distBB = knn(treeB1, latB2[i,:], 1)
+    if distAA[1] < tol
+        push!(AA, latA2[i,:])
     end
-    
-    latAA = transpose(hcat(AA...))
-    latBA = transpose(hcat(BA...))
-    latAB = transpose(hcat(AB...))
-    latBB = transpose(hcat(BB...))
-    
-    mkdir("data/"*ang_name*"_0.01")
-    
-    try
-        write_lattice(latAA, "data/"*ang_name*"_0.01/200M_"*name*"_AA.dat")
-    catch e
-        println("AA lattice is empty!")
+    if distBA[1] < tol
+        push!(BA, latA2[i,:])
     end
-    try
-        write_lattice(latBA, "data/"*ang_name*"_0.01/200M_"*name*"_BA.dat")
-    catch e
-        println("BA lattice is empty!")
+    if distAB[1] < tol
+        push!(AB, latB2[i,:])
     end
-    try
-        write_lattice(latAB, "data/"*ang_name*"_0.01/200M_"*name*"_AB.dat")
-    catch e
-        println("AB lattice is empty!")
+    if distBB[1] < tol
+        push!(BB, latB2[i,:])
     end
-    try
-        write_lattice(latBB, "data/"*ang_name*"_0.01/200M_"*name*"_BB.dat")
-    catch e
-        println("BB lattice is empty!")
-    end
+end
+
+latAA = transpose(hcat(AA...))
+latBA = transpose(hcat(BA...))
+latAB = transpose(hcat(AB...))
+latBB = transpose(hcat(BB...))
+
+mkdir("data/"*ang_name*"_0.001")
+
+try
+    write_lattice(latAA, "data/"*ang_name*"_0.001/latticeAA.dat")
+catch e
+    println("AA lattice is empty!")
+end
+try
+    write_lattice(latBA, "data/"*ang_name*"_0.001/latticeBA.dat")
+catch e
+    println("BA lattice is empty!")
+end
+try
+    write_lattice(latAB, "data/"*ang_name*"_0.001/latticeAB.dat")
+catch e
+    println("AB lattice is empty!")
+end
+try
+    write_lattice(latBB, "data/"*ang_name*"_0.001/latticeBB.dat")
+catch e
+    println("BB lattice is empty!")
 end
