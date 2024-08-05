@@ -14,7 +14,7 @@ name = @sprintf("%6.4f", tol)
 origin = [0.0, 0.0]
 
 # INITIAL DEFINITIONS
-n = 200
+n = 500000
 a = 2.46
 hex_center_pivot = false
 AB_stacking = true
@@ -46,40 +46,78 @@ println("Creating bottom lattices...")
 latA1 = zeros(n ÷ 2, 2)
 latB1 = zeros(n ÷ 2, 2)
 
-HexUtils.create_honeycomb_lattice_fractional!(latA1, latB1, a, false)
+HexUtils.create_honeycomb_lattice!(latA1, latB1, a, false)
 
-#println("Creating top lattices...")
-#latA2 = zeros(n ÷ 2, 2)
-#latB2 = zeros(n ÷ 2, 2)
-#
-#HexUtils.create_honeycomb_lattice!(latA2[:,1:2], latB2[:,1:2], a, AB_stacking)
-#
-#angle = 0.01914345108312343
-#println("Angle in radians: ", angle)
-#println("Angle in degrees: ", (angle * 180) / pi)
-#
-## ROTATE SECOND LATTICE BY THE ANGLE
-#rotate_lattice!(latA2[:,1:2], angle, origin2)
-#rotate_lattice!(latB2[:,1:2], angle, origin2)
+println("Creating top lattices...")
+latA2 = zeros(n ÷ 2, 2)
+latB2 = zeros(n ÷ 2, 2)
 
-lenA1 = size(latA1)[1]
-typeA1 = ones(Int64, lenA1)
-println("Lattices created, starting symmetry calculation")
+HexUtils.create_honeycomb_lattice!(latA2[:,1:2], latB2[:,1:2], a, AB_stacking)
 
-lat_angle = pi/3.0
-a1 = [a, 0.0, 0.0]
-a2 = [a*cos(lat_angle), a*sin(lat_angle), 0.0]
-a3 = [0.0, 0.0, 1.0]
+angle = 0.01914345108312343
+println("Angle in radians: ", angle)
+println("Angle in degrees: ", (angle * 180) / pi)
 
-# CONVERTING CARTESIAN TO FRACTIONAL COORDINATES
-#latA1_frac = cartesian_to_fractional(hcat(a1,a2,a3)..., latA1)
-latA1_3d = zeros(n ÷ 2, 3)
-for i=1:lenA1
-    latA1_3d[i,:] = [latA1[i,1], latA1[i,2], 0.0]
+# ROTATE SECOND LATTICE BY THE ANGLE
+rotate_lattice!(latA2[:,1:2], angle, origin2)
+rotate_lattice!(latB2[:,1:2], angle, origin2)
+
+tol = 1.0e-3
+println("Tolerance:        ", tol)
+name = @sprintf("%6.4f", tol)
+
+AA = []
+BA = []
+AB = []
+BB = []
+
+treeA1 = KDTree(transpose(latA1))
+treeB1 = KDTree(transpose(latB1))
+
+for i in 1:div(n,2)
+    indAA, distAA = knn(treeA1, latA2[i,:], 1)
+    indBA, distBA = knn(treeB1, latA2[i,:], 1)
+    indAB, distAB = knn(treeA1, latB2[i,:], 1)
+    indBB, distBB = knn(treeB1, latB2[i,:], 1)
+    if distAA[1] < tol
+        push!(AA, latA2[i,:])
+    end
+    if distBA[1] < tol
+        push!(BA, latA2[i,:])
+    end
+    if distAB[1] < tol
+        push!(AB, latB2[i,:])
+    end
+    if distBB[1] < tol
+        push!(BB, latB2[i,:])
+    end
 end
 
-test_lat = spglib.Lattice([a1,a2,a3])
-test_cell = spglib.Cell(test_lat, latA1_3d, typeA1)
-println(test_lat)
-println(test_cell)
-test = spglib.get_symmetry(test_cell)
+latAA = transpose(hcat(AA...))
+latBA = transpose(hcat(BA...))
+latAB = transpose(hcat(AB...))
+latBB = transpose(hcat(BB...))
+
+ang_name = @sprintf("%9.7f", angle)
+mkdir("data/"*ang_name)
+
+try
+    write_lattice(latAA, "data/"*ang_name*"/"*name*"_AA.dat")
+catch e
+    println("AA lattice is empty!")
+end
+try
+    write_lattice(latBA, "data/"*ang_name*"/"*name*"_BA.dat")
+catch e
+    println("BA lattice is empty!")
+end
+try
+    write_lattice(latAB, "data/"*ang_name*"/"*name*"_AB.dat")
+catch e
+    println("AB lattice is empty!")
+end
+try
+    write_lattice(latBB, "data/"*ang_name*"/"*name*"_BB.dat")
+catch e
+    println("BB lattice is empty!")
+end
