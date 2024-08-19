@@ -78,6 +78,8 @@ unique_kpts = grid[ind_unique] / np.array(mesh, dtype=float)
 kpts = grid / np.array(mesh, dtype=float)
 unique_kpts = np.transpose(unique_kpts)
 
+print(counts)
+
 # ANALYZING ROTATIONS AND TRANSLATIONS
 n_eqv = []
 categories = []
@@ -88,6 +90,19 @@ for i in range(len(ind_unique)):
 
     categories[n_eqv.index(counts[i])].append(kpts[ind_unique[i]])
 
+full_bz = []
+# max_sym = len(sym_data.rotations)
+max_sym = max(counts)
+for i in range(len(ind_unique)):
+    if counts[i] == max_sym:
+        pt = kpts[ind_unique[i]]
+        full_bz.append(pt)
+        for j in range(int(max_sym/2)):
+            full_bz.append(sym_data.rotations[j] @ pt)
+
+full_bz = np.transpose(full_bz)
+
+# PLOTTING K SPACE STUFF
 ax1 = plt.subplot(211, projection="3d")
 leg = []
 for i in range(len(categories)):
@@ -99,13 +114,16 @@ ax1.legend(leg, loc="center left", bbox_to_anchor=(1, 0.5))
 
 xlim1, xlim2, ylim1, ylim2, zlim1, zlim2 = ax1.axis()
 
+# ax2 = plt.subplot(212, projection="3d")
+# chosen = 0
+# c = categories[chosen]
+# c_tp = np.transpose(c)
+# ax2.scatter(c_tp[0,:], c_tp[1,:], c_tp[2,:])
+# ax2.legend([n_eqv[chosen]], loc="center left", bbox_to_anchor=(1, 0.5))
+# ax2.set(xlim=(xlim1,xlim2), ylim=(ylim1,ylim2), zlim=(zlim1,zlim2))
+
 ax2 = plt.subplot(212, projection="3d")
-chosen = 0
-c = categories[chosen]
-c_tp = np.transpose(c)
-ax2.scatter(c_tp[0,:], c_tp[1,:], c_tp[2,:])
-ax2.legend([n_eqv[chosen]], loc="center left", bbox_to_anchor=(1, 0.5))
-ax2.set(xlim=(xlim1,xlim2), ylim=(ylim1,ylim2), zlim=(zlim1,zlim2))
+ax2.scatter(full_bz[0,:], full_bz[1,:], full_bz[2,:])
 
 plt.show()
 
