@@ -77,7 +77,7 @@ print(f"International notation: {sym_data.international}")
 print(f"Hall notation:          {sym_data.hall}")
 
 # GAMMA CENTERED MESH
-mesh = [20, 20, 20]
+mesh = [50, 50, 50]
 mapping, grid = spglib.get_ir_reciprocal_mesh(mesh, graphene_structure, is_shift=[0, 0, 0])
 
 # IRREDUCIBLE K-POINTS
@@ -93,31 +93,32 @@ unique_kpts = np.transpose(unique_kpts)
 n_eqv = []
 categories = []
 for i in range(len(ind_unique)):
-    if counts[i] not in n_eqv:
-        n_eqv.append(counts[i])
+    cc = max(counts)/counts[i]
+    if cc not in n_eqv:
+        n_eqv.append(int(cc))
         categories.append([])
 
-    categories[n_eqv.index(counts[i])].append(kpts[ind_unique[i]])
+    categories[n_eqv.index(cc)].append(kpts[ind_unique[i]])
 
 print(n_eqv)
 
-full_bz = []
-n_rot = len(sym_data.rotations)
-n_trans = 0  # len(sym_data.translations)
-max_sym = n_rot + n_trans
-for i in range(len(ind_unique)):
-    if counts[i] == max_sym:
-        pt = kpts[ind_unique[i]]
-        full_bz.append(pt)
-        for j in range(n_rot):
-            full_bz.append(sym_data.rotations[j] @ pt)
-        # for k in range(n_trans):
-        #     if sym_data.translations[k] != np.array([0.0, 0.0, 0.0]):
-        #         full_bz.append(sym_data.translations[k] + pt)
-# print(n_rot, n_trans)
-# print(sym_data.translations)
-
-full_bz = np.transpose(full_bz)
+# full_bz = []
+# n_rot = len(sym_data.rotations)
+# n_trans = 0  # len(sym_data.translations)
+# max_sym = max(counts)
+# for i in range(len(ind_unique)):
+#     if counts[i] == max_sym/counts[i]:
+#         pt = kpts[ind_unique[i]]
+#         full_bz.append(pt)
+#         for j in range(n_rot):
+#             full_bz.append(sym_data.rotations[j] @ pt)
+#         # for k in range(n_trans):
+#         #     if sym_data.translations[k] != np.array([0.0, 0.0, 0.0]):
+#         #         full_bz.append(sym_data.translations[k] + pt)
+# # print(n_rot, n_trans)
+# # print(sym_data.translations)
+# 
+# full_bz = np.transpose(full_bz)
 
 # PLOTTING K SPACE STUFF
 ax1 = plt.subplot(211, projection="3d")
@@ -129,19 +130,19 @@ for i in range(len(categories)):
     leg.append(f"{n_eqv[i]} sym.")
 ax1.legend(leg, loc="center left", bbox_to_anchor=(1, 0.5))
 
-# xlim1, xlim2, ylim1, ylim2, zlim1, zlim2 = ax1.axis()
-xlim1, xlim2, ylim1, ylim2 = ax1.axis()
-
-# ax2 = plt.subplot(212, projection="3d")
-# chosen = 0
-# c = categories[chosen]
-# c_tp = np.transpose(c)
-# ax2.scatter(c_tp[0,:], c_tp[1,:], c_tp[2,:])
-# ax2.legend([n_eqv[chosen]], loc="center left", bbox_to_anchor=(1, 0.5))
-# ax2.set(xlim=(xlim1,xlim2), ylim=(ylim1,ylim2), zlim=(zlim1,zlim2))
 
 ax2 = plt.subplot(212, projection="3d")
-ax2.scatter(full_bz[0,:], full_bz[1,:], full_bz[2,:], s=50)
+chosen = 3
+c = categories[chosen]
+c_tp = np.transpose(c)
+ax2.scatter(c_tp[0,:], c_tp[1,:], c_tp[2,:])
+ax2.legend([n_eqv[chosen]], loc="center left", bbox_to_anchor=(1, 0.5))
+xlim1, xlim2, ylim1, ylim2, zlim1, zlim2 = ax1.axis()
+# xlim1, xlim2, ylim1, ylim2 = ax1.axis()
+ax2.set(xlim=(xlim1,xlim2), ylim=(ylim1,ylim2), zlim=(zlim1,zlim2))
+
+# ax2 = plt.subplot(212, projection="3d")
+# ax2.scatter(full_bz[0,:], full_bz[1,:], full_bz[2,:], s=50)
 
 # # PLOT OF K POINTS
 # ax1 = plt.subplot(111, projection="3d")
