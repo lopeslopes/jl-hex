@@ -130,41 +130,56 @@ ax1.set_aspect("equal")
 
 
 # PLOTTING REAL SPACE POINTS AFTER ROTATIONS
-ax2 = plt.subplot(212)
+# ax2 = plt.subplot(212)
+ax2 = plt.subplot(212, projection="3d")
 
 p1 = lattice[0,:]
 p2 = lattice[1,:]
 p3 = lattice[2,:]
 
-for j in range(3):
+print(f"Number of symmetry operations of group: {len(sym_data.rotations)}")
+
+for j in range(1):
     new_points = []
     spin = []
     grp_chr = []
+    op_viz = []
     tol = 1e-5
     pn = lattice[j,:]
     for i, rot in enumerate(sym_data.rotations):
-        # POINT
-        new_p = rot @ pn
-        new_points.append(new_p)
-        # ax2.annotate(i, new_p[:2])
-        # SPIN TEST
-        spin_test = pn + [0.0, 0.0, 1.0]
-        new_spin_test = rot @ spin_test
-        ds = new_spin_test - new_p
-        spin.append(int(ds[2]))
-        gc = 0
-        if all(np.isclose(new_p, pn)):
-            gc += int(ds[2])
-        grp_chr.append(gc)
+        if (i >= 1 and i < 2):
+            # POINT
+            new_p = rot @ pn
+            new_points.append(new_p)
+            # ax2.annotate(i, new_p[:2])
+            # OPERATION VISUALIZATION
+            max_viz = 15
+            for k in range(max_viz):
+                operation = float(k/max_viz)*rot
+                op_viz.append(operation @ pn)
+            # SPIN TEST
+            spin_test = pn + [0.0, 0.0, 1.0]
+            new_spin_test = rot @ spin_test
+            ds = new_spin_test - new_p
+            spin.append(int(ds[2]))
+            gc = 0
+            if all(np.isclose(new_p, pn)):
+                gc += int(ds[2])
+            grp_chr.append(gc)
 
     new_points = np.transpose(np.array(new_points))
-    ax2.scatter(new_points[0,:], new_points[1,:])
+    op_viz = np.transpose(np.array(op_viz))
+    # ax2.scatter(new_points[0,:], new_points[1,:])
+    ax2.scatter(new_points[0,:], new_points[1,:], new_points[2,:])
+    ax2.scatter(op_viz[0,:], op_viz[1,:], op_viz[2,:])
 
 # print(grp_chr)
 
 
-ax2.quiver(0.0, 0.0, lattice[0,0], lattice[0,1], angles="xy", scale_units="xy", scale=1, color="red")
-ax2.quiver(0.0, 0.0, lattice[1,0], lattice[1,1], angles="xy", scale_units="xy", scale=1, color="green")
+# ax2.quiver(0.0, 0.0, lattice[0,0], lattice[0,1], angles="xy", scale_units="xy", scale=1, color="red")
+# ax2.quiver(0.0, 0.0, lattice[1,0], lattice[1,1], angles="xy", scale_units="xy", scale=1, color="green")
+ax2.quiver(0.0, 0.0, 0.0, lattice[0,0], lattice[0,1], 0.0, color="red")
+ax2.quiver(0.0, 0.0, 0.0, lattice[1,0], lattice[1,1], 0.0, color="green")
 
 ax2.set_aspect("equal")
 ax2.set_xlim([-10000.0, 10000.0])
