@@ -97,7 +97,7 @@ p3 = lattice[2,:]
 
 print(f"Number of symmetry operations of group: {len(sym_data.rotations)}")
 
-for j in range(1):
+for j in range(2):
     new_points = []
     spin = []
     grp_chr = []
@@ -105,72 +105,98 @@ for j in range(1):
     pn = lattice[j,:]
     for i, rot in enumerate(sym_data.rotations):
         # DISSECATING ROTATION MATRICES
-        trc = np.trace(rot)
         values, vectors = np.linalg.eig(rot)
+        trc = np.trace(rot)
         det = np.linalg.det(rot)
         trc_det = trc * det
 
-        if (trc_det == 3.0 or trc_det == 2.0 or trc_det == 0.0):
-            gen_rot = rot
-
-        else:
-            if (trc_det == -1 and trc == 1):
-                # IMPROPER ROTATION
-                ax_ind = np.where(values == -1.0)[0][0]
-                rot_axis = vectors[ax_ind]
+        if (det == 1.0):
+            if (trc == -1):
+                ax_ind = np.where(values == 1.0)[0][0]
+                rot_axis = vectors[ax_ind].real/np.linalg.norm(vectors[ax_ind].real)
+                rot_angle = np.arccos((trc - det)/2)
+                # print("C2/C'2/C''2")
+            elif (trc == 0):
+                ax_ind = np.where(values == 1.0)[0][0]
+                rot_axis = vectors[ax_ind].real/np.linalg.norm(vectors[ax_ind].real)
+                rot_angle = np.arccos((trc - det)/2)
+                # print("C3")
+            elif (trc == 2):
+                ax_ind = np.where(values == 1.0)[0][0]
+                rot_axis = vectors[ax_ind].real/np.linalg.norm(vectors[ax_ind].real)
+                rot_angle = np.arccos((trc - det)/2)
+                # print("C6")
+            elif (trc == 3):
+                ax_ind = np.where(values == 1.0)[0][0]
+                rot_axis = vectors[ax_ind].real/np.linalg.norm(vectors[ax_ind].real)
+                rot_angle = np.arccos((trc - det)/2)
+                # print("E")
+            else:
+                rot_axis = [0.0, 0.0, 1.0]
                 rot_angle = 0.0
 
-            elif (trc_det == -1 and trc == -1):
-                # PROPER ROTATION
-                ax_ind = np.where(values == 1.0)[0][0]
-                rot_axis = vectors[ax_ind]
-                rot_angle = np.pi
-
-            else:
-                rot_axis = (1/((3-trc)*(1+trc)))*np.array([rot[2,1]-rot[1,2], rot[0,2]-rot[2,0], rot[1,0]-rot[0,1]])
-                # ax_ind = np.where(values == det)[0][0]
-                # rot_axis = vectors[ax_ind]
+        elif (det == -1.0):
+            if (trc == 1):
+                ax_ind = np.where(values == -1.0)[0][0]
+                rot_axis = vectors[ax_ind].real/np.linalg.norm(vectors[ax_ind].real)
                 rot_angle = np.arccos((trc - det)/2)
+                # print("sigma_h/d/v")
+            elif (trc == 0):
+                ax_ind = np.where(values == -1.0)[0][0]
+                rot_axis = vectors[ax_ind].real/np.linalg.norm(vectors[ax_ind].real)
+                rot_angle = np.arccos((trc - det)/2)
+                # print("S6")
+            elif (trc == -2):
+                ax_ind = np.where(values == -1.0)[0][0]
+                rot_axis = vectors[ax_ind].real/np.linalg.norm(vectors[ax_ind].real)
+                rot_angle = np.arccos((trc - det)/2)
+                # print("S3")
+            elif (trc == -3):
+                ax_ind = np.where(values == -1.0)[0][0]
+                rot_axis = vectors[ax_ind].real/np.linalg.norm(vectors[ax_ind].real)
+                rot_angle = np.arccos((trc - det)/2)
+                # print("i")
+            else:
+                rot_axis = [0.0, 0.0, 1.0]
+                rot_angle = 0.0
 
-            gen_rot = np.zeros((3,3), dtype=float)
-            max_viz = 15
-            for k in range(max_viz+1):
-                alpha_rot = rot_angle*float(k/max_viz)
-                for m in range(3):
-                    for l in range(3):
-                        aux_set = set([0, 1, 2])
-                        aux_set.discard(m)
-                        aux_set.discard(l)
-                        n = aux_set.pop()
-                        gen_rot[m,l] = delta(m,l)*np.cos(alpha_rot) + (det-np.cos(alpha_rot))*rot_axis[m]*rot_axis[l] - np.sin(alpha_rot)*lciv(m,l,n)*rot_axis[n]
+        gen_rot = np.zeros((3,3), dtype=float)
+        max_viz = 15
+        for k in range(max_viz+1):
+            alpha_rot = rot_angle*float(k/max_viz)
+            for m in range(3):
+                for l in range(3):
+                    aux_set = set([0, 1, 2])
+                    aux_set.discard(m)
+                    aux_set.discard(l)
+                    n = aux_set.pop()
+                    gen_rot[m,l] = delta(m,l)*np.cos(alpha_rot) + (det-np.cos(alpha_rot))*rot_axis[m]*rot_axis[l] - np.sin(alpha_rot)*lciv(m,l,n)*rot_axis[n]
 
-                dgd_point = gen_rot @ pn
-                op_viz.append(dgd_point.real)
+            dgd_point = gen_rot @ pn
+            op_viz.append(dgd_point.real)
 
-            op_viz = np.transpose(np.array(op_viz))
-            ax2.plot(op_viz[0,:], op_viz[1,:], op_viz[2,:])
-            op_viz = []
-
-        print(det)
+        op_viz = np.transpose(np.array(op_viz))
+        ax2.plot(op_viz[0,:], op_viz[1,:], op_viz[2,:])
+        op_viz = []
 
         # POINT
         new_p = gen_rot @ pn
         new_points.append(new_p.real)
 
-        # # SPIN TESTING
-        # spin_test = pn + [0.0, 0.0, 1.0]
-        # new_spin_test = gen_rot.real @ spin_test
-        # ds = new_spin_test - new_p
-        # spin.append(int(ds[2].real))
-        # gc = 0
-        # if all(np.isclose(new_p, pn)):
-        #     gc += int(ds[2])
-        # grp_chr.append(gc)
+        # SPIN TESTING
+        spin_test = pn + [0.0, 0.0, 1.0]
+        new_spin_test = gen_rot.real @ spin_test
+        ds = new_spin_test - new_p
+        spin.append(int(ds[2].real))
+        gc = 0
+        if all(np.isclose(new_p, pn)):
+            gc += int(ds[2])
+        grp_chr.append(gc)
 
     new_points = np.transpose(np.array(new_points))
     ax2.scatter(new_points[0,:], new_points[1,:], new_points[2,:])
 
-# print(grp_chr)
+print(grp_chr)
 
 ax2.quiver(0.0, 0.0, 0.0, lattice[0,0], lattice[0,1], 0.0, color="red")
 ax2.quiver(0.0, 0.0, 0.0, lattice[1,0], lattice[1,1], 0.0, color="green")
