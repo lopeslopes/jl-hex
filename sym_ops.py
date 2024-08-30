@@ -104,73 +104,68 @@ for j in range(1):
     op_viz = []
     pn = lattice[j,:]
     for i, rot in enumerate(sym_data.rotations):
-        if (1):
-            # DISSECATING ROTATION MATRICES
-            trc = np.trace(rot)
-            values, vectors = np.linalg.eig(rot)
-            det = np.linalg.det(rot)
-            trc_det = trc * det
+        # DISSECATING ROTATION MATRICES
+        trc = np.trace(rot)
+        values, vectors = np.linalg.eig(rot)
+        det = np.linalg.det(rot)
+        trc_det = trc * det
 
-            if (trc_det == 3):
-                gen_rot = rot
+        if (trc_det == 3.0 or trc_det == 2.0 or trc_det == 0.0):
+            gen_rot = rot
+
+        else:
+            if (trc_det == -1 and trc == 1):
+                # IMPROPER ROTATION
+                ax_ind = np.where(values == -1.0)[0][0]
+                rot_axis = vectors[ax_ind]
+                rot_angle = 0.0
+
+            elif (trc_det == -1 and trc == -1):
+                # PROPER ROTATION
+                ax_ind = np.where(values == 1.0)[0][0]
+                rot_axis = vectors[ax_ind]
+                rot_angle = np.pi
 
             else:
-                if (trc_det == -1):
-                    # IMPROPER ROTATION
-                    if (trc == 1):
-                        ax_ind = np.where(values == -1.0)[0][0]
-                        rot_axis = vectors[ax_ind]
-                        rot_angle = 0.0
+                rot_axis = (1/((3-trc)*(1+trc)))*np.array([rot[2,1]-rot[1,2], rot[0,2]-rot[2,0], rot[1,0]-rot[0,1]])
+                # ax_ind = np.where(values == det)[0][0]
+                # rot_axis = vectors[ax_ind]
+                rot_angle = np.arccos((trc - det)/2)
 
-                    # PROPER ROTATION
-                    elif (trc == -1):
-                        ax_ind = np.where(values == 1.0)[0][0]
-                        rot_axis = vectors[ax_ind]
-                        rot_angle = np.pi
+            gen_rot = np.zeros((3,3), dtype=float)
+            max_viz = 15
+            for k in range(max_viz+1):
+                alpha_rot = rot_angle*float(k/max_viz)
+                for m in range(3):
+                    for l in range(3):
+                        aux_set = set([0, 1, 2])
+                        aux_set.discard(m)
+                        aux_set.discard(l)
+                        n = aux_set.pop()
+                        gen_rot[m,l] = delta(m,l)*np.cos(alpha_rot) + (det-np.cos(alpha_rot))*rot_axis[m]*rot_axis[l] - np.sin(alpha_rot)*lciv(m,l,n)*rot_axis[n]
 
-                else:
-                    if (det == 1.0):
-                        ax_ind = np.where(values == 1.0)[0][0]
-                        rot_axis = vectors[ax_ind]
-                        rot_angle = np.acos((trc - 1)/2)
+                dgd_point = gen_rot @ pn
+                op_viz.append(dgd_point.real)
 
-                    elif (det == -1.0):
-                        ax_ind = np.where(values == -1.0)[0][0]
-                        rot_axis = vectors[ax_ind]
-                        rot_angle = np.acos((trc + 1)/2)
+            op_viz = np.transpose(np.array(op_viz))
+            ax2.plot(op_viz[0,:], op_viz[1,:], op_viz[2,:])
+            op_viz = []
 
-                gen_rot = np.zeros((3,3), dtype=float)
-                max_viz = 15
-                for k in range(max_viz+1):
-                    alpha_rot = rot_angle*float(k/max_viz)
-                    for m in range(3):
-                        for l in range(3):
-                            aux_set = set([0, 1, 2])
-                            aux_set.discard(m)
-                            aux_set.discard(l)
-                            n = aux_set.pop()
-                            gen_rot[m,l] = delta(m,l)*np.cos(alpha_rot) + (det-np.cos(alpha_rot))*rot_axis[m]*rot_axis[l] - np.sin(alpha_rot)*lciv(m,l,n)*rot_axis[n]
+        print(det)
 
-                    dgd_point = gen_rot @ pn
-                    op_viz.append(dgd_point.real)
+        # POINT
+        new_p = gen_rot @ pn
+        new_points.append(new_p.real)
 
-                op_viz = np.transpose(np.array(op_viz))
-                ax2.plot(op_viz[0,:], op_viz[1,:], op_viz[2,:])
-                op_viz = []
-
-            # POINT
-            new_p = gen_rot @ pn
-            new_points.append(new_p.real)
-
-            # # SPIN TEST
-            # spin_test = pn + [0.0, 0.0, 1.0]
-            # new_spin_test = gen_rot.real @ spin_test
-            # ds = new_spin_test - new_p
-            # spin.append(int(ds[2].real))
-            # gc = 0
-            # if all(np.isclose(new_p, pn)):
-            #     gc += int(ds[2])
-            # grp_chr.append(gc)
+        # # SPIN TESTING
+        # spin_test = pn + [0.0, 0.0, 1.0]
+        # new_spin_test = gen_rot.real @ spin_test
+        # ds = new_spin_test - new_p
+        # spin.append(int(ds[2].real))
+        # gc = 0
+        # if all(np.isclose(new_p, pn)):
+        #     gc += int(ds[2])
+        # grp_chr.append(gc)
 
     new_points = np.transpose(np.array(new_points))
     ax2.scatter(new_points[0,:], new_points[1,:], new_points[2,:])
