@@ -32,21 +32,6 @@ lattice = np.array([[4428.000519758899, 2484.072918780167, 0.0],
                     [-4365.2705123956675, 2592.7244786925335, 0.0],
                     [0.0, 0.0, 10000.0]])
 
-# SIMPLE CUBIC LATTICE FOR TESTING
-# lattice = np.array([[1.0, 0.0, 0.0],
-#                     [0.0, 1.0, 0.0],
-#                     [0.0, 0.0, 1.0]])
-
-# BCC LATTICE FOR TESTING
-# lattice = np.array([[-0.5, 0.5, 0.5],
-#                     [0.5, -0.5, 0.5],
-#                     [0.5, 0.5, -0.5]])
-
-# FCC LATTICE FOR TESTING
-# lattice = np.array([[0.5, 0.5, 0.0],
-#                     [0.0, 0.5, 0.5],
-#                     [0.5, 0.0, 0.5]])
-
 # TESTING LENGTHS
 dist1 = np.sqrt(lattice[0,0]**2 + lattice[0,1]**2 + lattice[0,2]**2)
 dist2 = np.sqrt(lattice[1,0]**2 + lattice[1,1]**2 + lattice[1,2]**2)
@@ -102,18 +87,27 @@ def_positions = np.transpose([lattice[0,:],
                               lattice[1,:],
                               -lattice[0,:],
                               -lattice[1,:],
-                              lattice[0,:]+lattice[1,:], 
-                              -lattice[0,:]-lattice[1,:],
-                              [0.0, 0.0, 0.0]])
+                              [0.0, dist1, 0.0], # lattice[0,:]+lattice[1,:], 
+                              [0.0, -dist1, 0.0]]) # -lattice[0,:]-lattice[1,:]])
 
 ax2.scatter(def_positions[0,:], def_positions[1,:], def_positions[2,:], s=200)
 def_positions = np.transpose(def_positions)
+
+aux_vec1 = lattice[0,:]/np.linalg.norm(lattice[0,:])
+aux_vec2 = lattice[1,:]/np.linalg.norm(lattice[1,:])
+aux_vec3 = np.array([0.0, 1.0, 0.0]) + aux_vec1
+aux_vec3 = aux_vec3/np.linalg.norm(aux_vec3)
+aux_vec4 = np.array([0.0, 1.0, 0.0]) + aux_vec2
+aux_vec4 = aux_vec4/np.linalg.norm(aux_vec4)
+print(aux_vec1, np.linalg.norm(aux_vec1))
+print(aux_vec2, np.linalg.norm(aux_vec2))
+print(aux_vec3, np.linalg.norm(aux_vec3))
+print(aux_vec4, np.linalg.norm(aux_vec4))
 
 grp_chr = np.zeros(len(sym_data.rotations), dtype=int)
 for jj, pn in enumerate(def_positions):
     grp_chr_names = ["" for i in range(len(sym_data.rotations))]
     new_points = []
-    spin = []
     op_viz = []
     for i, rot in enumerate(sym_data.rotations):
         # DISSECATING ROTATION MATRICES
@@ -126,7 +120,7 @@ for jj, pn in enumerate(def_positions):
         if (det == 1.0):
             if (trc == -1):
                 ax_ind = np.where(values == 1.0)[0][0]
-                rot_axis = vectors[ax_ind].real #/np.linalg.norm(vectors[ax_ind].real)
+                rot_axis = vectors[ax_ind].real/np.linalg.norm(vectors[ax_ind].real)
                 rot_angle = np.arccos((trc - det)/2)
                 if all(np.isclose(rot_axis, np.array([0.0, 0.0, 1.0]))):
                     grp_chr_names[i] = "C2"
@@ -135,16 +129,20 @@ for jj, pn in enumerate(def_positions):
                 elif all(np.isclose(rot_axis, np.array([0.0, 1.0, 0.0]))):
                     grp_chr_names[i] = "C**2"
                 elif (rot_axis[0] == rot_axis[1]):
-                    rot_axis = np.array([0.5, 0.866, 0.0])
+                    # rot_axis = np.array([0.5, 0.866, 0.0])
+                    rot_axis = aux_vec3
                     grp_chr_names[i] = "C*2"
                 elif (rot_axis[0] == -rot_axis[1]):
-                    rot_axis = np.array([-0.5, 0.866, 0.0])
+                    # rot_axis = np.array([-0.5, 0.866, 0.0])
+                    rot_axis = aux_vec4
                     grp_chr_names[i] = "C*2"
                 elif (rot_axis[0] == 2*rot_axis[1]):
-                    rot_axis = np.array([0.866, 0.5, 0.0])
+                    # rot_axis = np.array([0.866, 0.5, 0.0])
+                    rot_axis = aux_vec1
                     grp_chr_names[i] = "C**2"
                 elif (2*rot_axis[0] == rot_axis[1]):
-                    rot_axis = np.array([-0.866, 0.5, 0.0])
+                    #rot_axis = np.array([-0.866, 0.5, 0.0])
+                    rot_axis = aux_vec2
                     grp_chr_names[i] = "C**2"
             elif (trc == 0):
                 ax_ind = np.where(values == 1.0)[0][0]
@@ -174,7 +172,7 @@ for jj, pn in enumerate(def_positions):
         elif (det == -1.0):
             if (trc == 1):
                 ax_ind = np.where(values == -1.0)[0][0]
-                rot_axis = vectors[ax_ind].real #/np.linalg.norm(vectors[ax_ind].real)
+                rot_axis = vectors[ax_ind].real/np.linalg.norm(vectors[ax_ind].real)
                 rot_angle = np.arccos((trc - det)/2)
                 if all(np.isclose(rot_axis, np.array([0.0, 0.0, 1.0]))):
                     grp_chr_names[i] = "sigma_h"
@@ -183,16 +181,20 @@ for jj, pn in enumerate(def_positions):
                 elif all(np.isclose(rot_axis, np.array([0.0, 1.0, 0.0]))):
                     grp_chr_names[i] = "sigma_d"
                 elif (rot_axis[0] == rot_axis[1]):
-                    rot_axis = np.array([0.5, 0.866, 0.0])
+                    # rot_axis = np.array([0.5, 0.866, 0.0])
+                    rot_axis = aux_vec3
                     grp_chr_names[i] = "sigma_v"
                 elif (rot_axis[0] == -rot_axis[1]):
-                    rot_axis = np.array([-0.5, 0.866, 0.0])
+                    # rot_axis = np.array([-0.5, 0.866, 0.0])
+                    rot_axis = aux_vec4
                     grp_chr_names[i] = "sigma_v"
                 elif (rot_axis[0] == 2*rot_axis[1]):
-                    rot_axis = np.array([0.866, 0.5, 0.0])
+                    # rot_axis = np.array([0.866, 0.5, 0.0])
+                    rot_axis = aux_vec1
                     grp_chr_names[i] = "sigma_d"
                 elif (2*rot_axis[0] == rot_axis[1]):
-                    rot_axis = np.array([-0.866, 0.5, 0.0])
+                    # rot_axis = np.array([-0.866, 0.5, 0.0])
+                    rot_axis = aux_vec2
                     grp_chr_names[i] = "sigma_d"
             elif (trc == 0):
                 ax_ind = np.where(values == -1.0)[0][0]
@@ -235,22 +237,25 @@ for jj, pn in enumerate(def_positions):
             op_viz.append(dgd_point.real)
 
         op_viz = np.transpose(np.array(op_viz))
-        ax2.plot(op_viz[0,:], op_viz[1,:], op_viz[2,:])
+        if (jj == 0):
+            ax2.plot(op_viz[0,:], op_viz[1,:], op_viz[2,:])
+
         op_viz = []
 
         # POINT
         new_p = gen_rot @ pn
-        new_points.append(new_p.real)
+        #new_points.append(new_p.real)
 
         # SPIN TESTING
         spin_test = pn + [0.0, 0.0, 1.0]
         new_spin_test = gen_rot.real @ spin_test
         ds = new_spin_test - new_p
-        spin.append(int(ds[2].real))
         gc = 0
         for pos in def_positions:
             if all(np.isclose(new_p, pos)):
                 gc += int(ds[2])
+            else:
+                new_points.append(new_p.real)
         grp_chr[i] += gc
 
     new_points = np.transpose(np.array(new_points))
@@ -265,6 +270,7 @@ for j, nu in enumerate(names_unique):
     cont = 0
     for i in ind:
         if grp_chr[i] != chr_final:
+            print(nu, chr_final, grp_chr[i])
             chr_final = grp_chr[i]
             cont += 1
     chr_unique[j] = chr_final
