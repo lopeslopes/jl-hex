@@ -97,15 +97,28 @@ p3 = lattice[2,:]
 
 print(f"Number of symmetry operations of group: {len(sym_data.rotations)}")
 
-for j in range(2):
+# MAKING LIST OF POINTS IN HEXAGON VERTICES
+def_positions = np.transpose([lattice[0,:],
+                              lattice[1,:],
+                              -lattice[0,:],
+                              -lattice[1,:],
+                              lattice[0,:]+lattice[1,:], 
+                              -lattice[0,:]-lattice[1,:],
+                              [0.0, 0.0, 0.0]])
+
+ax2.scatter(def_positions[0,:], def_positions[1,:], def_positions[2,:], s=200)
+def_positions = np.transpose(def_positions)
+
+grp_chr = np.zeros(len(sym_data.rotations), dtype=int)
+for jj, pn in enumerate(def_positions):
+    grp_chr_names = ["" for i in range(len(sym_data.rotations))]
     new_points = []
     spin = []
-    grp_chr = []
     op_viz = []
-    pn = lattice[j,:]
     for i, rot in enumerate(sym_data.rotations):
         # DISSECATING ROTATION MATRICES
         values, vectors = np.linalg.eig(rot)
+        vectors = np.transpose(vectors)
         trc = np.trace(rot)
         det = np.linalg.det(rot)
         trc_det = trc * det
@@ -113,24 +126,47 @@ for j in range(2):
         if (det == 1.0):
             if (trc == -1):
                 ax_ind = np.where(values == 1.0)[0][0]
-                rot_axis = vectors[ax_ind].real/np.linalg.norm(vectors[ax_ind].real)
+                rot_axis = vectors[ax_ind].real #/np.linalg.norm(vectors[ax_ind].real)
                 rot_angle = np.arccos((trc - det)/2)
-                # print("C2/C'2/C''2")
+                if all(np.isclose(rot_axis, np.array([0.0, 0.0, 1.0]))):
+                    grp_chr_names[i] = "C2"
+                elif all(np.isclose(rot_axis, np.array([1.0, 0.0, 0.0]))):
+                    grp_chr_names[i] = "C*2"
+                elif all(np.isclose(rot_axis, np.array([0.0, 1.0, 0.0]))):
+                    grp_chr_names[i] = "C**2"
+                elif (rot_axis[0] == rot_axis[1]):
+                    rot_axis = np.array([0.5, 0.866, 0.0])
+                    grp_chr_names[i] = "C*2"
+                elif (rot_axis[0] == -rot_axis[1]):
+                    rot_axis = np.array([-0.5, 0.866, 0.0])
+                    grp_chr_names[i] = "C*2"
+                elif (rot_axis[0] == 2*rot_axis[1]):
+                    rot_axis = np.array([0.866, 0.5, 0.0])
+                    grp_chr_names[i] = "C**2"
+                elif (2*rot_axis[0] == rot_axis[1]):
+                    rot_axis = np.array([-0.866, 0.5, 0.0])
+                    grp_chr_names[i] = "C**2"
             elif (trc == 0):
                 ax_ind = np.where(values == 1.0)[0][0]
                 rot_axis = vectors[ax_ind].real/np.linalg.norm(vectors[ax_ind].real)
                 rot_angle = np.arccos((trc - det)/2)
-                # print("C3")
+                aux_name = "C3"
+                if aux_name in grp_chr_names:
+                    rot_angle = rot_angle + 2*(np.pi - rot_angle)
+                grp_chr_names[i] = "C3"
             elif (trc == 2):
                 ax_ind = np.where(values == 1.0)[0][0]
                 rot_axis = vectors[ax_ind].real/np.linalg.norm(vectors[ax_ind].real)
                 rot_angle = np.arccos((trc - det)/2)
-                # print("C6")
+                aux_name = "C6"
+                if aux_name in grp_chr_names:
+                    rot_angle = rot_angle + 2*(np.pi - rot_angle)
+                grp_chr_names[i] = "C6"
             elif (trc == 3):
                 ax_ind = np.where(values == 1.0)[0][0]
                 rot_axis = vectors[ax_ind].real/np.linalg.norm(vectors[ax_ind].real)
                 rot_angle = np.arccos((trc - det)/2)
-                # print("E")
+                grp_chr_names[i] = "E"
             else:
                 rot_axis = [0.0, 0.0, 1.0]
                 rot_angle = 0.0
@@ -138,24 +174,47 @@ for j in range(2):
         elif (det == -1.0):
             if (trc == 1):
                 ax_ind = np.where(values == -1.0)[0][0]
-                rot_axis = vectors[ax_ind].real/np.linalg.norm(vectors[ax_ind].real)
+                rot_axis = vectors[ax_ind].real #/np.linalg.norm(vectors[ax_ind].real)
                 rot_angle = np.arccos((trc - det)/2)
-                # print("sigma_h/d/v")
+                if all(np.isclose(rot_axis, np.array([0.0, 0.0, 1.0]))):
+                    grp_chr_names[i] = "sigma_h"
+                elif all(np.isclose(rot_axis, np.array([1.0, 0.0, 0.0]))):
+                    grp_chr_names[i] = "sigma_v"
+                elif all(np.isclose(rot_axis, np.array([0.0, 1.0, 0.0]))):
+                    grp_chr_names[i] = "sigma_d"
+                elif (rot_axis[0] == rot_axis[1]):
+                    rot_axis = np.array([0.5, 0.866, 0.0])
+                    grp_chr_names[i] = "sigma_v"
+                elif (rot_axis[0] == -rot_axis[1]):
+                    rot_axis = np.array([-0.5, 0.866, 0.0])
+                    grp_chr_names[i] = "sigma_v"
+                elif (rot_axis[0] == 2*rot_axis[1]):
+                    rot_axis = np.array([0.866, 0.5, 0.0])
+                    grp_chr_names[i] = "sigma_d"
+                elif (2*rot_axis[0] == rot_axis[1]):
+                    rot_axis = np.array([-0.866, 0.5, 0.0])
+                    grp_chr_names[i] = "sigma_d"
             elif (trc == 0):
                 ax_ind = np.where(values == -1.0)[0][0]
                 rot_axis = vectors[ax_ind].real/np.linalg.norm(vectors[ax_ind].real)
                 rot_angle = np.arccos((trc - det)/2)
-                # print("S6")
+                aux_name = "S6"
+                if aux_name in grp_chr_names:
+                    rot_angle = rot_angle + 2*(np.pi - rot_angle)
+                grp_chr_names[i] = "S6"
             elif (trc == -2):
                 ax_ind = np.where(values == -1.0)[0][0]
                 rot_axis = vectors[ax_ind].real/np.linalg.norm(vectors[ax_ind].real)
                 rot_angle = np.arccos((trc - det)/2)
-                # print("S3")
+                aux_name = "S3"
+                if aux_name in grp_chr_names:
+                    rot_angle = rot_angle + 2*(np.pi - rot_angle)
+                grp_chr_names[i] = "S3"
             elif (trc == -3):
                 ax_ind = np.where(values == -1.0)[0][0]
                 rot_axis = vectors[ax_ind].real/np.linalg.norm(vectors[ax_ind].real)
                 rot_angle = np.arccos((trc - det)/2)
-                # print("i")
+                grp_chr_names[i] = "i"
             else:
                 rot_axis = [0.0, 0.0, 1.0]
                 rot_angle = 0.0
@@ -189,17 +248,33 @@ for j in range(2):
         ds = new_spin_test - new_p
         spin.append(int(ds[2].real))
         gc = 0
-        if all(np.isclose(new_p, pn)):
-            gc += int(ds[2])
-        grp_chr.append(gc)
+        for pos in def_positions:
+            if all(np.isclose(new_p, pos)):
+                gc += int(ds[2])
+        grp_chr[i] += gc
 
     new_points = np.transpose(np.array(new_points))
     ax2.scatter(new_points[0,:], new_points[1,:], new_points[2,:])
 
-print(grp_chr)
+names_unique, counts = np.unique(grp_chr_names, return_counts=True)
+chr_unique = np.zeros(len(names_unique), dtype=int)
 
-ax2.quiver(0.0, 0.0, 0.0, lattice[0,0], lattice[0,1], 0.0, color="red")
-ax2.quiver(0.0, 0.0, 0.0, lattice[1,0], lattice[1,1], 0.0, color="green")
+for j, nu in enumerate(names_unique):
+    ind = [i for i, val in enumerate(grp_chr_names) if val==nu]
+    chr_final = 0
+    cont = 0
+    for i in ind:
+        if grp_chr[i] != chr_final:
+            chr_final = grp_chr[i]
+            cont += 1
+    chr_unique[j] = chr_final
+
+print("CHARACTERES")
+for n, c in zip(names_unique, chr_unique):
+    print(f"{n: ^7}", f"{c: ^3}")
+
+# ax2.quiver(0.0, 0.0, 0.0, lattice[0,0], lattice[0,1], 0.0, color="red")
+# ax2.quiver(0.0, 0.0, 0.0, lattice[0,0], lattice[0,1], 0.0, color="red")
 
 ax2.set_box_aspect((1, 1, 1))
 ax2.set_xlim([-10000.0, 10000.0])
