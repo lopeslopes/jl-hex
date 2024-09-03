@@ -93,12 +93,24 @@ def_positions = np.transpose([lattice[0,:],
 ax2.scatter(def_positions[0,:], def_positions[1,:], def_positions[2,:], s=200)
 def_positions = np.transpose(def_positions)
 
-aux_vec1 = lattice[0,:]/np.linalg.norm(lattice[0,:])
-aux_vec2 = lattice[1,:]/np.linalg.norm(lattice[1,:])
-aux_vec3 = np.array([0.0, 1.0, 0.0]) + aux_vec1
+aux_vec1 = lattice[0,:]/dist1
+aux_vec2 = lattice[1,:]/dist2
+aux_vec3 = def_positions[4,:] + def_positions[0,:]
 aux_vec3 = aux_vec3/np.linalg.norm(aux_vec3)
-aux_vec4 = np.array([0.0, 1.0, 0.0]) + aux_vec2
+aux_vec4 = def_positions[4,:] + def_positions[1,:]
 aux_vec4 = aux_vec4/np.linalg.norm(aux_vec4)
+
+print(aux_vec1, np.linalg.norm(aux_vec1))
+print(aux_vec2, np.linalg.norm(aux_vec2))
+print(aux_vec3, np.linalg.norm(aux_vec3))
+print(aux_vec4, np.linalg.norm(aux_vec4))
+
+# aux_vec1 = lattice[0,:]/np.linalg.norm(lattice[0,:])
+# aux_vec2 = lattice[1,:]/np.linalg.norm(lattice[1,:])
+# aux_vec3 = np.array([0.0, 1.0, 0.0]) + aux_vec1
+# aux_vec3 = aux_vec3/np.linalg.norm(aux_vec3)
+# aux_vec4 = np.array([0.0, 1.0, 0.0]) + aux_vec2
+# aux_vec4 = aux_vec4/np.linalg.norm(aux_vec4)
 
 grp_chr = np.zeros(len(sym_data.rotations), dtype=int)
 grp_chr_names = ["" for i in range(len(sym_data.rotations))]
