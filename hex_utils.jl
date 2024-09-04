@@ -1,8 +1,8 @@
 module HexUtils
 
-using LinearAlgebra: inv
+using LinearAlgebra
 
-export create_honeycomb_lattice!, create_honeycomb_lattice_fractional!, write_lattice, rotate_lattice!, read_lattice, rotate_3d, sym_op_d6h, cartesian_to_fractional
+export create_honeycomb_lattice!, create_honeycomb_lattice_fractional!, write_lattice, rotate_lattice!, read_lattice, rotate_3d, sym_op_d6h, analyze_sym_op!
 
 
 function create_honeycomb_lattice!(latticeA::Array{Float64,2}, latticeB::Array{Float64,2}, a::Float64, ab_stacking::Bool)
@@ -280,14 +280,92 @@ function sym_op_d6h(point, operation)
     return new_point
 end
 
-function cartesian_to_fractional(lattice, cartesian_positions)
-    lattice_inv = inv(lattice)
-    fractional_positions = []
-    for pos in cartesian_positions
-        frac_pos = lattice_inv * pos
-        push!(fractional_positions, frac_pos)
+function analyze_sym_op!(rot_matrix, det, grp_chr_names, i, aux_axis)
+    trc = LinearAlgebra.tr(rot_matrix)
+    solution = LinearAlgebra.eigen(rot_matrix)
+    values = solution.values
+    vectors = transpose(solution.vectors)
+
+    ax_ind = findall(isapprox(v, det) for v in values)
+
+    axis = real(vectors[ax_ind[end],1:3])
+    angle = acos((trc - det)/2)
+
+    if (det == 1.0)
+        if (trc == 3)
+            grp_chr_names[i] = "E"
+        elseif (trc == 2)
+            if ("C6" in grp_chr_names)
+                angle = angle + 2*(pi - angle)
+            end
+            grp_chr_names[i] = "C6"
+        elseif (trc == 0)
+            if ("C3" in grp_chr_names)
+                angle = angle + 2*(pi - angle)
+            end
+            grp_chr_names[i] = "C3"
+        elseif (trc == -1)
+            if (isapprox(axis, [1.0, 0.0, 0.0]))
+                grp_chr_names[i] = "C*2"
+            elseif (isapprox(axis, [0.0, 1.0, 0.0]))
+                grp_chr_names[i] = "C**2"
+            elseif (isapprox(axis, [0.0, 0.0, 1.0]))
+                grp_chr_names[i] = "C2"
+            elseif (isapprox(axis[1], axis[2]))
+                axis = aux_axis[3][:]
+                grp_chr_names[i] = "C*2"
+            elseif (isapprox(axis[1], -axis[2]))
+                axis = aux_axis[4][:]
+                grp_chr_names[i] = "C*2"
+            elseif (isapprox(axis[1], 2*axis[2]))
+                axis = aux_axis[1][:]
+                grp_chr_names[i] = "C**2"
+            elseif (isapprox(2*axis[1], axis[2]))
+                axis = aux_axis[2][:]
+                grp_chr_names[i] = "C**2"
+            end
+        end
+    elseif (det == -1.0)
+        if (trc == -3)
+            grp_chr_names[i] = "i"
+        elseif (trc == -2)
+            if ("S3" in grp_chr_names)
+                angle = angle + 2*(pi - angle)
+            end
+            grp_chr_names[i] = "S3"
+        elseif (trc == 0)
+            if ("S6" in grp_chr_names)
+                angle = angle + 2*(pi - angle)
+            end
+            grp_chr_names[i] = "S6"
+        elseif (trc == 1)
+            if (isapprox(axis, [1.0, 0.0, 0.0]))
+                grp_chr_names[i] = "sigma_v"
+            elseif (isapprox(axis, [0.0, 1.0, 0.0]))
+                grp_chr_names[i] = "sigma_d"
+            elseif (isapprox(axis, [0.0, 0.0, 1.0]))
+                grp_chr_names[i] = "sigma_h"
+            elseif (isapprox(axis[1], axis[2]))
+                axis = aux_axis[3][:]
+                grp_chr_names[i] = "sigma_v"
+            elseif (isapprox(axis[1], -axis[2]))
+                axis = aux_axis[4][:]
+                grp_chr_names[i] = "sigma_v"
+            elseif (isapprox(axis[1], 2*axis[2]))
+                axis = aux_axis[1][:]
+                grp_chr_names[i] = "sigma_d"
+            elseif (isapprox(2*axis[1], axis[2]))
+                axis = aux_axis[2][:]
+                grp_chr_names[i] = "sigma_d"
+            end
+        end
     end
-    return fractional_positions
+
+    if (grp_chr_names[i] == "")
+        println(axis)
+    end
+
+    return axis, angle
 end
 
 end
