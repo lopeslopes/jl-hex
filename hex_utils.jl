@@ -2,7 +2,7 @@ module HexUtils
 
 using LinearAlgebra
 
-export create_honeycomb_lattice!, create_honeycomb_lattice_fractional!, write_lattice, rotate_lattice!, read_lattice, rotate_3d, sym_op_d6h, analyze_sym_op!
+export create_honeycomb_lattice!, create_honeycomb_lattice_fractional!, write_lattice, rotate_lattice!, read_lattice, rotate_3d, analyze_sym_op!
 
 
 function create_honeycomb_lattice!(latticeA::Array{Float64,2}, latticeB::Array{Float64,2}, a::Float64, ab_stacking::Bool)
@@ -158,128 +158,6 @@ function rotate_3d(point, angle, rot_axis)
     return new_point
 end
 
-function sym_op_d6h(point, operation)
-    point_3d = [point[1], point[2], 0.0]
-
-    if operation == 1 # E
-        rot_matrix = [1 0 0; 
-                      0 1 0; 
-                      0 0 1]
-    elseif operation == 2 # C6_1
-        angle = pi/3
-        rot_matrix = [cos(angle) -sin(angle) 0; 
-                      sin(angle)  cos(angle) 0;
-                          0           0      1]
-    elseif operation == 3 # C6_2
-        angle = 5*pi/3
-        rot_matrix = [cos(angle) -sin(angle) 0; 
-                      sin(angle)  cos(angle) 0;
-                          0           0      1]
-    elseif operation == 4 # C3_1
-        angle = 2*pi/3
-        rot_matrix = [cos(angle) -sin(angle) 0; 
-                      sin(angle)  cos(angle) 0;
-                          0           0      1]
-    elseif operation == 5 # C3_2
-        angle = 4*pi/3
-        rot_matrix = [cos(angle) -sin(angle) 0; 
-                      sin(angle)  cos(angle) 0;
-                          0           0      1]
-    elseif operation == 6 # C2
-        rot_matrix = [-1  0  0; 
-                       0 -1  0; 
-                       0  0  1]
-    elseif operation == 7 # C'2_1
-        rot_matrix = [1  0  0; 
-                      0 -1  0; 
-                      0  0 -1]
-    elseif operation == 8 # C'2_2
-        angle = 4*pi/3
-        rot_matrix = [ cos(angle) -sin(angle)  0; 
-                      -sin(angle) -cos(angle)  0;
-                           0           0      -1]
-    elseif operation == 9 # C'2_3
-        angle = 4*pi/3
-        rot_matrix = [cos(angle)  sin(angle)  0; 
-                      sin(angle) -cos(angle)  0;
-                          0           0      -1]
-    elseif operation == 10 # C''2_1
-        angle = 4*pi/3
-        rot_matrix = [-cos(angle) -sin(angle)  0; 
-                      -sin(angle)  cos(angle)  0;
-                           0           0      -1]
-    elseif operation == 11 # C''2_2
-        rot_matrix = [-1  0  0; 
-                       0  1  0; 
-                       0  0 -1]
-    elseif operation == 12 # C''2_3
-        angle = 4*pi/3
-        rot_matrix = [-cos(angle) sin(angle)  0; 
-                       sin(angle) cos(angle)  0;
-                           0          0      -1]
-    elseif operation == 13 # i
-        rot_matrix = [-1  0  0; 
-                       0 -1  0; 
-                       0  0 -1]
-    elseif operation == 14 # S3_1
-        angle = 4*pi/3
-        rot_matrix = [ cos(angle) sin(angle)  0; 
-                      -sin(angle) cos(angle)  0;
-                           0          0      -1]
-    elseif operation == 15 # S3_2
-        angle = 4*pi/3
-        rot_matrix = [cos(angle) -sin(angle)  0; 
-                      sin(angle)  cos(angle)  0;
-                          0           0      -1]
-    elseif operation == 16 # S6_1
-        angle = 4*pi/3
-        rot_matrix = [-cos(angle)  sin(angle)  0; 
-                      -sin(angle) -cos(angle)  0;
-                           0           0      -1]
-    elseif operation == 17 # S6_2
-        angle = 4*pi/3
-        rot_matrix = [-cos(angle) -sin(angle)  0; 
-                       sin(angle) -cos(angle)  0;
-                           0           0      -1]
-    elseif operation == 18 # sigma_h
-        rot_matrix = [1  0  0; 
-                      0  1  0; 
-                      0  0 -1]
-    elseif operation == 19 # sigma_d_1
-        angle = 4*pi/3
-        rot_matrix = [-cos(angle) -sin(angle)  0; 
-                      -sin(angle)  cos(angle)  0;
-                           0           0       1]
-    elseif operation == 20 # sigma_d_2
-        rot_matrix = [-1  0  0; 
-                       0  1  0; 
-                       0  0  1]
-    elseif operation == 21 # sigma_d_3
-        angle = 4*pi/3
-        rot_matrix = [-cos(angle)  sin(angle)  0; 
-                       sin(angle)  cos(angle)  0;
-                           0           0       1]
-    elseif operation == 22 # sigma_v_1
-        rot_matrix = [1  0  0; 
-                      0 -1  0; 
-                      0  0  1]
-    elseif operation == 23 # sigma_v_2
-        angle = 4*pi/3
-        rot_matrix = [ cos(angle) -sin(angle)  0; 
-                      -sin(angle) -cos(angle)  0;
-                           0           0       1]
-    elseif operation == 24 # sigma_v_3
-        angle = 4*pi/3
-        rot_matrix = [cos(angle)  sin(angle)  0; 
-                      sin(angle) -cos(angle)  0;
-                          0           0       1]
-    end
-
-    point_3d = rot_matrix * point_3d
-    new_point = [point_3d[1], point_3d[2]]
-    return new_point
-end
-
 function analyze_sym_op!(rot_matrix, det, grp_chr_names, i, aux_axis)
     trc = LinearAlgebra.tr(rot_matrix)
     solution = LinearAlgebra.eigen(rot_matrix)
@@ -307,8 +185,10 @@ function analyze_sym_op!(rot_matrix, det, grp_chr_names, i, aux_axis)
         elseif (trc == -1)
             if (isapprox(axis, [1.0, 0.0, 0.0]))
                 grp_chr_names[i] = "C*2"
+                axis = aux_axis[5][:]
             elseif (isapprox(axis, [0.0, 1.0, 0.0]))
                 grp_chr_names[i] = "C**2"
+                axis = aux_axis[6][:]
             elseif (isapprox(axis, [0.0, 0.0, 1.0]))
                 grp_chr_names[i] = "C2"
             elseif (isapprox(axis[1], axis[2]))
@@ -341,8 +221,10 @@ function analyze_sym_op!(rot_matrix, det, grp_chr_names, i, aux_axis)
         elseif (trc == 1)
             if (isapprox(axis, [1.0, 0.0, 0.0]))
                 grp_chr_names[i] = "sigma_v"
+                axis = aux_axis[5][:]
             elseif (isapprox(axis, [0.0, 1.0, 0.0]))
                 grp_chr_names[i] = "sigma_d"
+                axis = aux_axis[6][:]
             elseif (isapprox(axis, [0.0, 0.0, 1.0]))
                 grp_chr_names[i] = "sigma_h"
             elseif (isapprox(axis[1], axis[2]))

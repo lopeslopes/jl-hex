@@ -9,63 +9,67 @@ using Printf
 using Combinatorics
 using StatsBase
 
-ase = pyimport("ase")
 spglib = pyimport("spglib")
 
 lattice = [[4428.000519758899, 2484.072918780167, 0.0],
-    [-4365.2705123956675, 2592.7244786925335, 0.0],
-    [0.0, 0.0, 10000.0]]
+           [-4365.2705123956675, 2592.7244786925335, 0.0],
+           [0.0, 0.0, 10000.0]]
+
+# lattice = [ [sqrt(3)/2, 1/2, 0.0],
+#             [-sqrt(3)/2, 1/2, 0.0],
+#             [0.0, 0.0, 10000]]
 
 a1_norm = LinearAlgebra.norm(lattice[1, :])
 a2_norm = LinearAlgebra.norm(lattice[2, :])
 a3_norm = LinearAlgebra.norm(lattice[3, :])
-
-println(a1_norm)
-println(a2_norm)
-println(a3_norm)
 
 positions = [[0.0, 0.0, 0.0]]
 numbers = [1]
 
 graphene = (lattice, positions, numbers)
 sym_data = spglib.get_symmetry_dataset(graphene)
+n_sym = size(sym_data.rotations)[1]
 println("Group number:           ", sym_data.number)
 println("Hall number:            ", sym_data.hall_number)
 println("International notation: ", sym_data.international)
 println("Hall notation:          ", sym_data.hall)
-n_sym = size(sym_data.rotations)[1]
-println("Number of symmetry operations of group: ", n_sym)
+println("Symmetry operations:    ", n_sym)
 
 ax1 = subplot(111, projection="3d")
 
 p1 = lattice[1][:]
-p2 = lattice[2][:]
-p3 = lattice[3][:]
-
+rot60 = transpose(hcat([[1/2, -sqrt(3)/2, 0.0],
+                        [sqrt(3)/2, 1/2, 0.0],
+                        [0.0, 0.0, 1.0]]...))
+p2 = rot60 * p1
+p3 = rot60 * p2
+p4 = rot60 * p3
+p5 = rot60 * p4
+p6 = rot60 * p5
 ext_cell = hcat([p1,
-    p2,
-    -p1,
-    -p2,
-    [0.0, a1_norm, 0.0],
-    [0.0, -a1_norm, 0.0]]...)
+                 p2,
+                 p3,
+                 p4,
+                 p5,
+                 p6]...)
 
-#ax1.scatter(ext_cell[1, :], ext_cell[2, :], ext_cell[3, :], s=200)
+ax1.scatter(ext_cell[1, :], ext_cell[2, :], ext_cell[3, :], s=200)
+cell_tree = KDTree(ext_cell)
 ext_cell = transpose(ext_cell)
 n_pts = size(ext_cell)[1]
 
 aux_vec1 = p1 / a1_norm
-aux_vec2 = p2 / a2_norm
-aux_vec3 = ext_cell[5, :] + ext_cell[1, :]
-aux_vec3 = aux_vec3 / LinearAlgebra.norm(aux_vec3)
-aux_vec4 = ext_cell[5, :] + ext_cell[2, :]
-aux_vec4 = aux_vec4 / LinearAlgebra.norm(aux_vec4)
-aux_axis = [aux_vec1, aux_vec2, aux_vec3, aux_vec4]
+aux_vec2 = p3 / a1_norm
+aux_vec3 = (p2 + p1) / LinearAlgebra.norm(p2 + p1)
+aux_vec4 = (p2 + p3) / LinearAlgebra.norm(p2 + p3)
+aux_vec5 = (p1 + p6) / LinearAlgebra.norm(p1 + p6)
+aux_vec6 = p2 / a1_norm
+aux_axis = [aux_vec1, aux_vec2, aux_vec3, aux_vec4, aux_vec5, aux_vec6]
 
 grp_chr_names = ["" for i in 1:n_sym]
 grp_chr = zeros(Int, n_sym)
 
 for i in 1:n_sym
-    # DISSECTING ROTATION MATRICES
     rot = sym_data.rotations[i,:,:]
     det = LinearAlgebra.det(rot)
 
@@ -98,7 +102,7 @@ for i in 1:n_sym
         gc = 0
         for pt_cell in eachrow(ext_cell)
             if (isapprox(new_p, pt_cell))
-                gc = gc + Int(ds[3])
+                gc = gc + Int(round(ds[3]))
             end
         end
         grp_chr[i] = grp_chr[i] + gc
@@ -106,6 +110,7 @@ for i in 1:n_sym
 
     new_points = hcat(new_points...)
     ax1.scatter(new_points[1, :], new_points[2, :], new_points[3, :])
+    new_points = transpose(new_points)
 end
 
 count_dict = countmap(grp_chr_names)
