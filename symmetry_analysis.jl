@@ -24,9 +24,10 @@ a2_norm = LinearAlgebra.norm(lattice[2, :])
 a3_norm = LinearAlgebra.norm(lattice[3, :])
 
 positions = [[0.0, 0.0, 0.0]]
+spins = [1.0]
 numbers = [1]
 
-graphene = (lattice, positions, numbers)
+graphene = (lattice, positions, numbers, spins)
 sym_data = spglib.get_symmetry_dataset(graphene, hall_number=0)
 n_rot = size(sym_data.rotations)[1]
 n_trans = size([sym_data.translations[i,:] for i in 1:size(sym_data.translations)[1] if sym_data.translations[i,:] != [0.0, 0.0, 0.0]])[1]
