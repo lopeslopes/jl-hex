@@ -2,7 +2,7 @@ module HexUtils
 
 using LinearAlgebra
 
-export create_honeycomb_lattice!, create_honeycomb_lattice_fractional!, write_lattice, rotate_lattice!, read_lattice, rotate_3d, analyze_sym_op!
+export create_honeycomb_lattice!, write_lattice, rotate_lattice!, read_lattice, read_lattice_3d, analyze_sym_op!
 
 
 function create_honeycomb_lattice!(latticeA::Array{Float64,2}, latticeB::Array{Float64,2}, a::Float64, ab_stacking::Bool)
@@ -56,51 +56,6 @@ function create_honeycomb_lattice!(latticeA::Array{Float64,2}, latticeB::Array{F
     end
 end
 
-function create_honeycomb_lattice_fractional!(latticeA::Array{Float64,2}, latticeB::Array{Float64,2}, a::Float64, ab_stacking::Bool)
-    num_columns = 2*div(isqrt(size(latticeA,1)*2),3)
-    #d = sqrt((a^2)/(2.0*(1.0-cos(2.0*angle))))
-    #d1 = [d*cos(angle/2.0), d*sin(angle/2.0)]
-
-    origin_a = [0.0, 0.0]
-    origin_b = [0.0, 0.0] #origin_a + d1
-
-    row = 1
-    i = 1
-    while(i < size(latticeA,1))
-        for j=1:num_columns
-            if (i > size(latticeA,1))
-                break
-            end
-            latticeA[i,:] = [origin_a[1] + Float64(j-1), origin_a[2]]
-            latticeB[i,:] = [origin_b[1] + Float64(j-1), origin_b[2]]
-            i = i + 1
-        end
-        row  = row + 1
-        if (row % 2 == 1)
-            origin_a = origin_a + [0.0, 1.0]
-            origin_b = origin_b + [0.0, 1.0]
-        else
-            origin_a = origin_a + [-1.0, 1.0]
-            origin_b = origin_b + [-1.0, 1.0]
-        end
-    end
-
-    i0 = div((row ÷ 2) * num_columns + div(num_columns,2), 1)
-    lat_origin = latticeA[i0,:]
-
-    #latticeA[:,1] = latticeA[:,1] .- lat_origin[1]
-    #latticeA[:,2] = latticeA[:,2] .- lat_origin[2]
-    #latticeB[:,1] = latticeB[:,1] .- lat_origin[1]
-    #latticeB[:,2] = latticeB[:,2] .- lat_origin[2]
-    
-    #if (ab_stacking)
-    #    latticeA[:,1] = latticeA[:,1] .- d1[1]
-    #    latticeA[:,2] = latticeA[:,2] .- d1[2]
-    #    latticeB[:,1] = latticeB[:,1] .- d1[1]
-    #    latticeB[:,2] = latticeB[:,2] .- d1[2]
-    #end
-end
-
 function write_lattice(lattice, filename)
     open(filename, "w") do file
         for i = 1:size(lattice, 1)
@@ -125,6 +80,22 @@ function read_lattice(filename)
     return lat
 end
 
+function read_lattice_3d(filename)
+    lat = []
+    open(filename, "r") do file
+        data = readlines(file)
+        for line in data
+            if line != "\n"
+                aux = split(line, ";")
+                aux_v = [parse(Float64, aux[1]), parse(Float64, aux[2]), 0.0]
+                push!(lat, aux_v)
+            end
+        end
+    end
+    lat = transpose(hcat(lat...))
+    return lat
+end
+
 function rotate_lattice!(lattice, angle, pivot)
     rot_matrix = [cos(angle) -sin(angle); sin(angle) cos(angle)]
 
@@ -133,29 +104,6 @@ function rotate_lattice!(lattice, angle, pivot)
         aux1 = rot_matrix * aux1
         lattice[i, :] .= aux1 .+ pivot
     end
-end
-
-function rotate_3d(point, angle, rot_axis)
-    # ROTATION AXIS: 1=x, 2=y, 3=z
-    point_3d = [point[1], point[2], 0.0]
-
-    if rot_axis == 1
-        rot_matrix = [1     0           0     ; 
-                      0 cos(angle) -sin(angle); 
-                      0 sin(angle)  cos(angle)]
-    elseif rot_axis == 2
-        rot_matrix = [ cos(angle) 0 sin(angle); 
-                           0      1     0     ; 
-                      -sin(angle) 0 cos(angle)]
-    else
-        rot_matrix = [cos(angle) -sin(angle) 0; 
-                      sin(angle)  cos(angle) 0; 
-                          0           0      1]
-    end
-
-    point_3d = rot_matrix * point_3d
-    new_point = [point_3d[1], point_3d[2]]
-    return new_point
 end
 
 function analyze_sym_op!(rot_matrix, det, grp_chr_names, i, aux_axis)
