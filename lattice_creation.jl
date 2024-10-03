@@ -2,6 +2,7 @@ include("hex_utils.jl")
 using .HexUtils
 using NearestNeighbors
 using Printf
+using Distributed
 
 
 # INITIAL DEFINITIONS
@@ -69,7 +70,8 @@ BA = []
 AB = []
 BB = []
 
-for i in 1:div(n,2)
+@distributed for i in 1:div(n,2)
+# for i in 1:div(n,2)
     indAA, distAA = knn(treeA1, latA2[i,:], 1)
     indBA, distBA = knn(treeB1, latA2[i,:], 1)
     indAB, distAB = knn(treeA1, latB2[i,:], 1)
