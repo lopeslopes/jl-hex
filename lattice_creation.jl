@@ -5,10 +5,10 @@ using Printf
 
 
 # INITIAL DEFINITIONS
-n = 200000000
+n = 1000000000
 a = 2.46
 hex_center_pivot = false
-AB_stacking = false
+AB_stacking = true
 
 # STACKING AND ORIGIN DEFINITION
 if AB_stacking
