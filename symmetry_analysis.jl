@@ -11,13 +11,17 @@ using StatsBase
 
 spglib = pyimport("spglib")
 
-lattice = [[4428.000519758899, 2484.072918780167, 0.0],
-           [-4365.2705123956675, 2592.7244786925335, 0.0],
-           [0.0, 0.0, 10000.0]]
+# lattice = [[4428.000519758899, 2484.072918780167, 0.0],
+#            [-4365.2705123956675, 2592.7244786925335, 0.0],
+#            [0.0, 0.0, 10000.0]]
 
 # lattice = [ [sqrt(3)/2, 1/2, 0.0],
 #             [-sqrt(3)/2, 1/2, 0.0],
 #             [0.0, 0.0, 10000]]
+
+lattice = [[ 8742.840013282768, 5159.883256290869,      0.0],
+           [-8840.009987150486, 4991.579924581863,      0.0],
+           [               0.0,               0.0, 100000.0]]
 
 a1_norm = LinearAlgebra.norm(lattice[1, :])
 a2_norm = LinearAlgebra.norm(lattice[2, :])
@@ -65,14 +69,6 @@ cell_tree = KDTree(ext_cell)
 ext_cell = transpose(ext_cell)
 n_pts = size(ext_cell)[1]
 
-aux_vec1 = p1 / a1_norm
-aux_vec2 = p3 / a1_norm
-aux_vec3 = (p2 + p1) / LinearAlgebra.norm(p2 + p1)
-aux_vec4 = (p2 + p3) / LinearAlgebra.norm(p2 + p3)
-aux_vec5 = (p1 + p6) / LinearAlgebra.norm(p1 + p6)
-aux_vec6 = p2 / a1_norm
-aux_axis = [aux_vec1, aux_vec2, aux_vec3, aux_vec4, aux_vec5, aux_vec6]
-
 grp_chr_names = ["" for i in 1:n_rot]
 grp_chr = zeros(Int, n_rot)
 
@@ -80,7 +76,7 @@ for i in 1:n_rot
     rot = sym_data.rotations[i,:,:]
     det = LinearAlgebra.det(rot)
 
-    rot_axis, rot_angle = analyze_sym_op!(rot, det, grp_chr_names, i, aux_axis)
+    rot_axis, rot_angle = analyze_sym_op!(rot, grp_chr_names, i, lattice)
 
     gen_rot = zeros(Float64, 3, 3)
     for m in 1:3

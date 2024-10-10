@@ -64,7 +64,7 @@ function write_lattice(lattice, filename)
     end
 end
 
-function read_lattice(filename)
+function read_lattice(filename, max_dist=0.0)
     lat = []
     open(filename, "r") do file
         data = readlines(file)
@@ -72,7 +72,10 @@ function read_lattice(filename)
             if line != "\n"
                 aux = split(line, ";")
                 aux_v = [parse(Float64, aux[1]), parse(Float64, aux[2])]
-                push!(lat, aux_v)
+                dist = sqrt(aux_v[1]^2 + aux_v[2]^2)
+                if ((max_dist == 0.0) || (dist < max_dist))
+                    push!(lat, aux_v)
+                end
             end
         end
     end
@@ -80,7 +83,7 @@ function read_lattice(filename)
     return lat
 end
 
-function read_lattice_3d(filename)
+function read_lattice_3d(filename, max_dist=0.0)
     lat = []
     open(filename, "r") do file
         data = readlines(file)
@@ -88,7 +91,10 @@ function read_lattice_3d(filename)
             if line != "\n"
                 aux = split(line, ";")
                 aux_v = [parse(Float64, aux[1]), parse(Float64, aux[2]), 0.0]
-                push!(lat, aux_v)
+                dist = sqrt(aux_v[1]^2 + aux_v[2]^2 + aux_v[3]^2)
+                if ((max_dist == 0.0) || (dist < max_dist))
+                    push!(lat, aux_v)
+                end
             end
         end
     end
@@ -106,11 +112,23 @@ function rotate_lattice!(lattice, angle, pivot)
     end
 end
 
-function analyze_sym_op!(rot_matrix, det, grp_chr_names, i, aux_axis)
+function analyze_sym_op!(rot_matrix, grp_chr_names, i, lattice_vecs)
     trc = LinearAlgebra.tr(rot_matrix)
+    det = LinearAlgebra.det(rot_matrix)
     solution = LinearAlgebra.eigen(rot_matrix)
     values = solution.values
     vectors = transpose(solution.vectors)
+
+    a1_norm = LinearAlgebra.norm(lattice_vecs[1, :])
+
+    p_aux = (lattice_vecs[2] + lattice_vecs[1]) / LinearAlgebra.norm(lattice_vecs[2] + lattice_vecs[1])
+    aux_v1 = lattice_vecs[1] / a1_norm
+    aux_v2 = lattice_vecs[2] / a1_norm
+    aux_v3 = (aux_v1 + p_aux) / LinearAlgebra.norm(aux_v1 + p_aux)
+    aux_v4 = (aux_v2 + p_aux) / LinearAlgebra.norm(aux_v2 + p_aux)
+    aux_v5 = (aux_v1 - aux_v2) / LinearAlgebra.norm(aux_v2 - aux_v1)
+    aux_v6 = p_aux / LinearAlgebra.norm(p_aux)
+    aux_axis = [aux_v1, aux_v2, aux_v3, aux_v4, aux_v5, aux_v6]
 
     ax_ind = findall(isapprox(v, det) for v in values)
 
