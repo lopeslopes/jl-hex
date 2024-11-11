@@ -39,7 +39,7 @@ for i in 1:n_rot
             aux_set = Set([1, 2, 3])
             delete!(aux_set, m)
             delete!(aux_set, l)
-n = first(aux_set)
+            n = first(aux_set)
             gen_rot[m, l] = (m == l) * cos(rot_angle) +
                             (det - cos(rot_angle)) * rot_axis[m] * rot_axis[l] -
                             sin(rot_angle) * levicivita([m, l, n]) * rot_axis[n]
@@ -53,19 +53,20 @@ n = first(aux_set)
     end
 end
 
-latAA = transpose(read_lattice_3d("data/0.0191435_bernal/latticeAA.dat", norm_a1+200.0))
-latBA = transpose(read_lattice_3d("data/0.0191435_bernal/latticeBA.dat", norm_a1+200.0))
-latAB = transpose(read_lattice_3d("data/0.0191435_bernal/latticeAB.dat", norm_a1+200.0))
-latBB = transpose(read_lattice_3d("data/0.0191435_bernal/latticeBB.dat", norm_a1+200.0))
+latAA = transpose(read_lattice_3d("data/0.0191435_aa_stack/latticeAA.dat", norm_a1+200.0))
+latBA = transpose(read_lattice_3d("data/0.0191435_aa_stack/latticeBA.dat", norm_a1+200.0))
+latAB = transpose(read_lattice_3d("data/0.0191435_aa_stack/latticeAB.dat", norm_a1+200.0))
+latBB = transpose(read_lattice_3d("data/0.0191435_aa_stack/latticeBB.dat", norm_a1+200.0))
 
-tol = 1e-3
+tol = 1e-8
 
-current_lat = latAA
+current_lat = latAA[:,1]
 tree = KDTree(current_lat)
 
 ax1 = subplot(111)
 
 num_out = 0
+total_atoms = Int(size(current_lat)[1]/3)
 println(lpad("ind", 3), "|", lpad("op_name", 8), "|", lpad("Atoms", 6), "|", lpad("Displaced", 10))
 # for op_ind in 8:8
 for op_ind in 1:size(op_cartesian)[1]
@@ -81,7 +82,7 @@ for op_ind in 1:size(op_cartesian)[1]
             push!(out_pt, aux_p)
         end
     end
-    println(lpad(string(op_ind), 3), "|", lpad(op_name[op_ind], 8), "|", lpad(string(size(current_lat)[2]), 6), "|", lpad(string(num_out), 10))
+    println(lpad(string(op_ind), 3), "|", lpad(op_name[op_ind], 8), "|", lpad(string(total_atoms), 6), "|", lpad(string(num_out), 10))
     out_pt = hcat(out_pt...)
     try
         ax1.scatter(out_pt[1,:], out_pt[2,:], s=20, color=("red", 0.7))
@@ -89,13 +90,13 @@ for op_ind in 1:size(op_cartesian)[1]
     end
 end
 
-ax1.scatter(current_lat[1,:], current_lat[2,:], s=50, color=("green", 0.3))
-
-ax1.set_xlim([-10000, 10000])
-ax1.set_ylim([-10000, 10000])
-ax1.set_aspect("equal")
-
-show()
+# ax1.scatter(current_lat[1,:], current_lat[2,:], s=50, color=("green", 0.3))
+#
+# ax1.set_xlim([-10000, 10000])
+# ax1.set_ylim([-10000, 10000])
+# ax1.set_aspect("equal")
+#
+# show()
 
 ### AA STACKED:
 # AA: todos
