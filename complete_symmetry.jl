@@ -60,14 +60,14 @@ latBB = transpose(read_lattice_3d("data/0.0191435_aa_stack/latticeBB.dat", norm_
 
 tol = 1e-8
 
-current_lat = latAA[:,1]
+current_lat = latAA
 tree = KDTree(current_lat)
 
 ax1 = subplot(111)
 
 num_out = 0
-total_atoms = Int(size(current_lat)[1]/3)
-println(lpad("ind", 3), "|", lpad("op_name", 8), "|", lpad("Atoms", 6), "|", lpad("Displaced", 10))
+total_atoms = Int(size(current_lat)[2])
+# println(lpad("ind", 3), "|", lpad("op_name", 8), "|", lpad("Atoms", 6), "|", lpad("Displaced", 10))
 # for op_ind in 8:8
 for op_ind in 1:size(op_cartesian)[1]
     operation = op_cartesian[op_ind][:,:]
@@ -82,7 +82,10 @@ for op_ind in 1:size(op_cartesian)[1]
             push!(out_pt, aux_p)
         end
     end
-    println(lpad(string(op_ind), 3), "|", lpad(op_name[op_ind], 8), "|", lpad(string(total_atoms), 6), "|", lpad(string(num_out), 10))
+    # println(lpad(string(op_ind), 3), "|", lpad(op_name[op_ind], 8), "|", lpad(string(total_atoms), 6), "|", lpad(string(num_out), 10))
+    if (num_out == 0)
+        println(op_name[op_ind])
+    end
     out_pt = hcat(out_pt...)
     try
         ax1.scatter(out_pt[1,:], out_pt[2,:], s=20, color=("red", 0.7))
