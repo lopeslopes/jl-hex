@@ -83,7 +83,7 @@ function read_lattice(filename, max_dist=0.0)
     return lat
 end
 
-function read_lattice_3d(filename, max_dist=0.0)
+function read_lattice_3d(filename, max_dist=0.0, min_dist=0.0)
     lat = []
     open(filename, "r") do file
         data = readlines(file)
@@ -93,7 +93,9 @@ function read_lattice_3d(filename, max_dist=0.0)
                 aux_v = [parse(Float64, aux[1]), parse(Float64, aux[2]), 0.0]
                 dist = sqrt(aux_v[1]^2 + aux_v[2]^2 + aux_v[3]^2)
                 if ((max_dist == 0.0) || (dist < max_dist))
-                    push!(lat, aux_v)
+                    if ((min_dist == 0.0) || (dist > min_dist))
+                        push!(lat, aux_v)
+                    end
                 end
             end
         end
