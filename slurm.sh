@@ -5,4 +5,4 @@
 #SBATCH --time=2-12
 #SBATCH --ntasks=1
 #SBATCH --cpus-per-task=18
-srun julia lattice_creation.jl -p 18
+srun julia slim_big_lat.jl
