@@ -55,31 +55,65 @@ end
 
 latA1 = transpose(read_lattice_3d("data/0.0191435_bernal/latticeA1_slim.dat"))
 latB1 = transpose(read_lattice_3d("data/0.0191435_bernal/latticeB1_slim.dat"))
-# latA2 = transpose(read_lattice_3d("data/0.0191435_bernal/latticeA2_slim.dat"))
-# latB2 = transpose(read_lattice_3d("data/0.0191435_bernal/latticeB2_slim.dat"))
+latA2 = transpose(read_lattice_3d("data/0.0191435_bernal/latticeA2_slim.dat"))
+latB2 = transpose(read_lattice_3d("data/0.0191435_bernal/latticeB2_slim.dat"))
 
 tol = 1e-8
 
 # SELECTING POINTS IN THE SAME RADIUS AS THE OVERLAP POINTS
-lat_out = []
+lat_out_A1 = []
+lat_out_B1 = []
+lat_out_A2 = []
+lat_out_B2 = []
+
 for point in eachcol(latA1)
     d_pt = sqrt(point[1]^2 + point[2]^2)
     if (abs(d_pt - norm_a1) < tol)
-        push!(lat_out, point)
+        push!(lat_out_A1, point)
     end
 end
-lat_out = hcat(lat_out...)
 
-current_lat = lat_out
-# push!(current_lat, lat_out[:,1])
+for point in eachcol(latB1)
+    d_pt = sqrt(point[1]^2 + point[2]^2)
+    if (abs(d_pt - norm_a1) < tol)
+        push!(lat_out_B1, point)
+    end
+end
 
-# current_lat = lat_out[1,:]
-tree = KDTree(current_lat)
+for point in eachcol(latA2)
+    d_pt = sqrt(point[1]^2 + point[2]^2)
+    if (abs(d_pt - norm_a1) < tol)
+        push!(lat_out_A2, point)
+    end
+end
 
+for point in eachcol(latB2)
+    d_pt = sqrt(point[1]^2 + point[2]^2)
+    if (abs(d_pt - norm_a1) < tol)
+        push!(lat_out_B2, point)
+    end
+end
+
+lat_out_A1 = hcat(lat_out_A1...)
+lat_out_B1 = hcat(lat_out_B1...)
+lat_out_A2 = hcat(lat_out_A2...)
+lat_out_B2 = hcat(lat_out_B2...)
+
+# current_point = lat_out_A1[:,1]
+# current_lat = []
+current_lat = lat_out_B2
 ax1 = subplot(111)
-
 num_out = 0
-total_atoms = Int(size(current_lat)[2])
+
+# for op_ind in 1:size(op_cartesian)[1]
+#     operation = op_cartesian[op_ind][:,:]
+#     aux_p = operation * current_point
+#     push!(current_lat, aux_p)
+# end
+# current_lat = hcat(current_lat...)
+tree = KDTree(current_lat)
+print(tree)
+
 for op_ind in 1:size(op_cartesian)[1]
     operation = op_cartesian[op_ind][:,:]
 
@@ -106,12 +140,12 @@ for op_ind in 1:size(op_cartesian)[1]
     catch e
     end
     try
-        ax1.scatter(in_pt[1,:], in_pt[2,:], s=20, color="blue")
+        ax1.scatter(in_pt[1,:], in_pt[2,:], s=20, color="magenta")
     catch e
     end
 end
 
-# ax1.scatter(current_lat[1,:], current_lat[2,:], s=50, color="green")
+ax1.scatter(current_lat[1,:], current_lat[2,:], s=70, color=("green", 0.3))
 
 ax1.set_xlim([-12000, 12000])
 ax1.set_ylim([-12000, 12000])
