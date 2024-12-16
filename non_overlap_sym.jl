@@ -55,12 +55,25 @@ end
 
 latA1 = transpose(read_lattice_3d("data/0.0191435_bernal/latticeA1_slim.dat"))
 latB1 = transpose(read_lattice_3d("data/0.0191435_bernal/latticeB1_slim.dat"))
-latA2 = transpose(read_lattice_3d("data/0.0191435_bernal/latticeA2_slim.dat"))
-latB2 = transpose(read_lattice_3d("data/0.0191435_bernal/latticeB2_slim.dat"))
+# latA2 = transpose(read_lattice_3d("data/0.0191435_bernal/latticeA2_slim.dat"))
+# latB2 = transpose(read_lattice_3d("data/0.0191435_bernal/latticeB2_slim.dat"))
 
 tol = 1e-8
 
-current_lat = latB2[:,:]
+# SELECTING POINTS IN THE SAME RADIUS AS THE OVERLAP POINTS
+lat_out = []
+for point in eachcol(latA1)
+    d_pt = sqrt(point[1]^2 + point[2]^2)
+    if (abs(d_pt - norm_a1) < tol)
+        push!(lat_out, point)
+    end
+end
+lat_out = hcat(lat_out...)
+
+current_lat = []
+push!(current_lat, lat_out[:,1])
+
+# current_lat = lat_out[1,:]
 tree = KDTree(current_lat)
 
 ax1 = subplot(111)
@@ -71,6 +84,7 @@ for op_ind in 1:size(op_cartesian)[1]
     operation = op_cartesian[op_ind][:,:]
 
     out_pt = []
+    in_pt = []
     global num_out = 0
     for point in eachcol(current_lat)
         aux_p = operation * point
@@ -78,19 +92,26 @@ for op_ind in 1:size(op_cartesian)[1]
         if (dist_pt > tol)
             global num_out += 1
             push!(out_pt, aux_p)
+        else
+            push!(in_pt, aux_p)
         end
     end
     if (num_out == 0)
         println(op_name[op_ind])
     end
     out_pt = hcat(out_pt...)
+    in_pt = hcat(in_pt...)
     try
         ax1.scatter(out_pt[1,:], out_pt[2,:], s=20, color="red")
     catch e
     end
+    try
+        ax1.scatter(in_pt[1,:], in_pt[2,:], s=20, color="blue")
+    catch e
+    end
 end
 
-ax1.scatter(current_lat[1,:], current_lat[2,:], s=50, color="green")
+# ax1.scatter(current_lat[1,:], current_lat[2,:], s=50, color="green")
 
 ax1.set_xlim([-12000, 12000])
 ax1.set_ylim([-12000, 12000])
