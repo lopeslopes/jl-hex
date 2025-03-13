@@ -6,7 +6,7 @@ using Distributed
 
 
 # INITIAL DEFINITIONS
-n = 1000000000
+n = 10000
 a = 2.46
 hex_center_pivot = false
 AB_stacking = true
@@ -44,7 +44,10 @@ treeB1 = KDTree(transpose(latB1))
 
 HexUtils.create_honeycomb_lattice!(latA2, latB2, a, AB_stacking)
 
-angle = 0.01914345108312343
+# angle = 0.01914345108312343
+p = 1.0
+q = 3.0
+angle = acos((3.0*(q^2) - (p^2))/(3.0*(q^2) + (p^2)))
 
 println("Angle in radians: ", angle)
 println("Angle in degrees: ", (angle * 180) / pi)
