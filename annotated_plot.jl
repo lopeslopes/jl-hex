@@ -42,39 +42,33 @@ while (flag == false)
         global i = ind[1]
     end
 end
-
-ax1 = subplot(111, aspect=1)
-
 poly_ord = hcat(poly_ord...)
 
 x = poly_ord[1,:]
 y = poly_ord[2,:]
-println(x)
-println(y)
+push!(x, x[1])
+push!(y, y[1])
 
-poly_ord = transpose(poly_ord)
-ax1.plot(poly_ord)
+ax1 = subplot(111, aspect=1)
 
+ax1.plot(x, y)
 
-
-# try ax1.scatter(latAA[:,1], latAA[:,2], s=20, color="blue")
-# catch e
-#     println("No AA points")
-# end
-# try ax1.scatter(latBA[:,1], latBA[:,2], s=20, color="orange")
-# catch e
-#     println("No BA points")
-# end
-# try ax1.scatter(latAB[:,1], latAB[:,2], s=20, color="purple")
-# catch e
-#     printl("No AB points")
-# end
-# try ax1.scatter(latBB[:,1], latBB[:,2], s=20, color="magenta")
-# catch e
-#     println("No BB points")
-# end
-
-ax1.scatter(x, y)
+try ax1.scatter(latAA[:,1], latAA[:,2], s=20, color="blue")
+catch e
+    println("No AA points")
+end
+try ax1.scatter(latBA[:,1], latBA[:,2], s=20, color="orange")
+catch e
+    println("No BA points")
+end
+try ax1.scatter(latAB[:,1], latAB[:,2], s=20, color="purple")
+catch e
+    printl("No AB points")
+end
+try ax1.scatter(latBB[:,1], latBB[:,2], s=20, color="magenta")
+catch e
+    println("No BB points")
+end
 
 ax1.set_xlim([-10, 10])
 ax1.set_ylim([-10, 10])
