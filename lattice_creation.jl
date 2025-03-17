@@ -6,7 +6,7 @@ using Distributed
 
 
 # INITIAL DEFINITIONS
-n = 10000
+n = 500000
 a = 2.46
 hex_center_pivot = false
 AB_stacking = true
@@ -46,7 +46,7 @@ HexUtils.create_honeycomb_lattice!(latA2, latB2, a, AB_stacking)
 
 # angle = 0.01914345108312343
 p = 1.0
-q = 3.0
+q = 62.0
 angle = acos((3.0*(q^2) - (p^2))/(3.0*(q^2) + (p^2)))
 
 println("Angle in radians: ", angle)
@@ -58,7 +58,7 @@ ang_name = @sprintf("%9.7f", angle)
 rotate_lattice!(latA2, angle, origin2)
 rotate_lattice!(latB2, angle, origin2)
 
-tol = 1.0e-3
+tol = 1.0e-8
 println("Tolerance:        ", tol)
 name = @sprintf("%6.4f", tol)
 

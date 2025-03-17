@@ -2,7 +2,7 @@ module HexUtils
 
 using LinearAlgebra
 
-export create_honeycomb_lattice!, write_lattice, rotate_lattice!, read_lattice, read_lattice_3d, analyze_sym_op!
+export create_honeycomb_lattice!, write_lattice, rotate_lattice!, rotate_point!, read_lattice, read_lattice_3d, analyze_sym_op!
 
 
 function create_honeycomb_lattice!(latticeA::Array{Float64,2}, latticeB::Array{Float64,2}, a::Float64, ab_stacking::Bool)
@@ -112,6 +112,14 @@ function rotate_lattice!(lattice, angle, pivot)
         aux1 = rot_matrix * aux1
         lattice[i, :] .= aux1 .+ pivot
     end
+end
+
+function rotate_point!(point, angle, pivot)
+    rot_matrix = [cos(angle) -sin(angle); sin(angle) cos(angle)]
+
+    aux1 = point .- pivot
+    aux1 = rot_matrix * aux1
+    point .= aux1 .+ pivot
 end
 
 function analyze_sym_op!(rot_matrix, grp_chr_names, i, lattice_vecs)

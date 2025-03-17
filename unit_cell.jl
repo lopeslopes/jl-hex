@@ -8,16 +8,20 @@ using NearestNeighbors
 using DelaunayTriangulation
 
 
-latAA = read_lattice("data/0.3802512/latticeAA.dat")
-latBA = read_lattice("data/0.3802512/latticeBA.dat")
-latAB = read_lattice("data/0.3802512/latticeAB.dat")
-latBB = read_lattice("data/0.3802512/latticeBB.dat")
+latAA = read_lattice("data/0.0186237/latticeAA.dat")
+latBA = read_lattice("data/0.0186237/latticeBA.dat")
+latAB = read_lattice("data/0.0186237/latticeAB.dat")
+latBB = read_lattice("data/0.0186237/latticeBB.dat")
 
 
+origin = [0.0, 0.0]
 tree = KDTree(transpose(latAB))
-ind_nbors, dist_nbors = knn(tree, [0.0, 0.0], 7)
+ind_nbors, dist_nbors = knn(tree, origin, 7)
 neighbors = [latAB[i,:] for i in ind_nbors]
 
+ax1 = subplot(111, aspect=1)
+
+## Wigner Seitz cell
 tri = triangulate(neighbors)
 tess = voronoi(tri)
 
@@ -42,16 +46,46 @@ while (flag == false)
         global i = ind[1]
     end
 end
+push!(poly_ord, poly_ord[1][:])
 poly_ord = hcat(poly_ord...)
 
 x = poly_ord[1,:]
 y = poly_ord[2,:]
-push!(x, x[1])
-push!(y, y[1])
-
-ax1 = subplot(111, aspect=1)
 
 ax1.plot(x, y)
+
+# area_ws_cell = DelaunayTriangulation.get_largest_area(DelaunayTriangulation.statistics(tri))
+n_poly = DelaunayTriangulation.num_polygons(tess)
+area_ws_cell = 0.0
+for i in 1:n_poly
+    area = DelaunayTriangulation.polygon_features(tess, i)[1]
+    if (area != Inf)
+        global area_ws_cell = area
+    end
+end
+println("Area (wigner seitz): ", area_ws_cell)
+
+
+## lattice vectors cell
+a1 = neighbors[1][:]
+a2 = copy(a1)
+rotate_point!(a2, (2.0/3.0)*pi, origin)
+a3 = a2 + a1
+poly_ord = [origin,
+            a1,
+            a3,
+            a2,
+            origin]
+poly_ord = hcat(poly_ord...)
+x = poly_ord[1,:]
+y = poly_ord[2,:]
+
+ax1.plot(x, y)
+
+a1_3d = [a1[1], a1[2], 0.0]
+a2_3d = [a2[1], a2[2], 0.0]
+area_lat_cell = LinearAlgebra.norm(LinearAlgebra.cross(a1_3d, a2_3d))
+println("Area (lattice vecs): ", area_lat_cell)
 
 try ax1.scatter(latAA[:,1], latAA[:,2], s=20, color="blue")
 catch e
@@ -63,15 +97,15 @@ catch e
 end
 try ax1.scatter(latAB[:,1], latAB[:,2], s=20, color="purple")
 catch e
-    printl("No AB points")
+    println("No AB points")
 end
 try ax1.scatter(latBB[:,1], latBB[:,2], s=20, color="magenta")
 catch e
     println("No BB points")
 end
 
-ax1.set_xlim([-10, 10])
-ax1.set_ylim([-10, 10])
+ax1.set_xlim([-500, 500])
+ax1.set_ylim([-500, 500])
 ax1.set_aspect("equal")
 
 show()
