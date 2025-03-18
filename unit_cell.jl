@@ -18,8 +18,9 @@ origin = [0.0, 0.0]
 tree = KDTree(transpose(latAB))
 ind_nbors, dist_nbors = knn(tree, origin, 7)
 neighbors = [latAB[i,:] for i in ind_nbors]
-
+#
 ax1 = subplot(111, aspect=1)
+legend = []
 
 ## Wigner Seitz cell
 tri = triangulate(neighbors)
@@ -53,6 +54,7 @@ x = poly_ord[1,:]
 y = poly_ord[2,:]
 
 ax1.plot(x, y)
+push!(legend, "Wigner-Seitz cell")
 
 # area_ws_cell = DelaunayTriangulation.get_largest_area(DelaunayTriangulation.statistics(tri))
 n_poly = DelaunayTriangulation.num_polygons(tess)
@@ -81,31 +83,42 @@ x = poly_ord[1,:]
 y = poly_ord[2,:]
 
 ax1.plot(x, y)
+push!(legend, "Lattice vectors cell")
 
 a1_3d = [a1[1], a1[2], 0.0]
 a2_3d = [a2[1], a2[2], 0.0]
 area_lat_cell = LinearAlgebra.norm(LinearAlgebra.cross(a1_3d, a2_3d))
 println("Area (lattice vecs): ", area_lat_cell)
 
-try ax1.scatter(latAA[:,1], latAA[:,2], s=20, color="blue")
+try 
+    ax1.scatter(latAA[:,1], latAA[:,2], s=20, color="blue")
+    push!(legend, "AA points")
 catch e
     println("No AA points")
 end
-try ax1.scatter(latBA[:,1], latBA[:,2], s=20, color="orange")
+try 
+    ax1.scatter(latBA[:,1], latBA[:,2], s=20, color="orange")
+    push!(legend, "BA points")
 catch e
     println("No BA points")
 end
-try ax1.scatter(latAB[:,1], latAB[:,2], s=20, color="purple")
+try 
+    ax1.scatter(latAB[:,1], latAB[:,2], s=50, color="purple")
+    push!(legend, "AB points")
 catch e
     println("No AB points")
 end
-try ax1.scatter(latBB[:,1], latBB[:,2], s=20, color="magenta")
+try 
+    ax1.scatter(latBB[:,1], latBB[:,2], s=20, color="magenta")
+    push!(legend, "BB points")
 catch e
     println("No BB points")
 end
 
-ax1.set_xlim([-500, 500])
-ax1.set_ylim([-500, 500])
+ax1.set_xlim([-400, 400])
+ax1.set_ylim([-400, 400])
 ax1.set_aspect("equal")
+
+ax1.legend(legend)
 
 show()

@@ -6,7 +6,7 @@ using Distributed
 
 
 # INITIAL DEFINITIONS
-n = 500000
+n = 50000000
 a = 2.46
 hex_center_pivot = false
 AB_stacking = true
@@ -44,10 +44,17 @@ treeB1 = KDTree(transpose(latB1))
 
 HexUtils.create_honeycomb_lattice!(latA2, latB2, a, AB_stacking)
 
-# angle = 0.01914345108312343
+
 p = 1.0
 q = 62.0
-angle = acos((3.0*(q^2) - (p^2))/(3.0*(q^2) + (p^2)))
+angle_i = acos((3.0*(q^2) - (p^2))/(3.0*(q^2) + (p^2)))
+angle_f = acos((3.0*((q-1)^2) - (p^2))/(3.0*((q-1)^2) + (p^2)))
+println(angle_i)
+println(angle_f)
+
+## 10 steps between each magic angle (maybe too much, but we'll see)
+i = 0
+angle = angle_i + i*(angle_f - angle_i)/10
 
 println("Angle in radians: ", angle)
 println("Angle in degrees: ", (angle * 180) / pi)
@@ -58,7 +65,7 @@ ang_name = @sprintf("%9.7f", angle)
 rotate_lattice!(latA2, angle, origin2)
 rotate_lattice!(latB2, angle, origin2)
 
-tol = 1.0e-8
+tol = 5.0e-3
 println("Tolerance:        ", tol)
 name = @sprintf("%6.4f", tol)
 
