@@ -8,10 +8,10 @@ using NearestNeighbors
 using DelaunayTriangulation
 
 
-latAA = read_lattice("data/0.0186237/latticeAA.dat")
-latBA = read_lattice("data/0.0186237/latticeBA.dat")
-latAB = read_lattice("data/0.0186237/latticeAB.dat")
-latBB = read_lattice("data/0.0186237/latticeBB.dat")
+latAA = read_lattice("data/0.0187458/latticeAA.dat")
+latBA = read_lattice("data/0.0187458/latticeBA.dat")
+latAB = read_lattice("data/0.0187458/latticeAB.dat")
+latBB = read_lattice("data/0.0187458/latticeBB.dat")
 
 
 origin = [0.0, 0.0]
