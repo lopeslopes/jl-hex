@@ -53,7 +53,7 @@ println(angle_i)
 println(angle_f)
 
 ## 10 steps between each magic angle (maybe too much, but we'll see)
-i = 0
+i = 5
 angle = angle_i + i*(angle_f - angle_i)/10
 
 println("Angle in radians: ", angle)
