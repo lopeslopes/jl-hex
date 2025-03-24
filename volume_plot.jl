@@ -20,7 +20,10 @@ open("cell_volume.dat", "r") do file
 end
 
 ax1 = subplot(111)
-ax1.scatter(angle, vol_ws)
-ax1.scatter(angle, vol_pv)
+#ax1.scatter(angle, vol_ws)
+ax1.scatter(angle, vol_pv, s=50)
+
+ax1.set_xlabel("Angle (rad)")
+ax1.set_ylabel("Volume (angstron squared)")
 
 show()

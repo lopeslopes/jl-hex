@@ -8,10 +8,10 @@ using NearestNeighbors
 using DelaunayTriangulation
 
 
-latAA = read_lattice("data/0.0187458/latticeAA.dat")
-latBA = read_lattice("data/0.0187458/latticeBA.dat")
-latAB = read_lattice("data/0.0187458/latticeAB.dat")
-latBB = read_lattice("data/0.0187458/latticeBB.dat")
+latAA = read_lattice("data/0.0188984/latticeAA.dat")
+latBA = read_lattice("data/0.0188984/latticeBA.dat")
+latAB = read_lattice("data/0.0188984/latticeAB.dat")
+latBB = read_lattice("data/0.0188984/latticeBB.dat")
 
 
 origin = [0.0, 0.0]
@@ -91,25 +91,25 @@ area_lat_cell = LinearAlgebra.norm(LinearAlgebra.cross(a1_3d, a2_3d))
 println("Area (lattice vecs): ", area_lat_cell)
 
 try 
-    ax1.scatter(latAA[:,1], latAA[:,2], s=20, color="blue")
+    ax1.scatter(latAA[:,1], latAA[:,2], s=10, color="blue")
     push!(legend, "AA points")
 catch e
     println("No AA points")
 end
 try 
-    ax1.scatter(latBA[:,1], latBA[:,2], s=20, color="orange")
+    ax1.scatter(latBA[:,1], latBA[:,2], s=10, color="orange")
     push!(legend, "BA points")
 catch e
     println("No BA points")
 end
 try 
-    ax1.scatter(latAB[:,1], latAB[:,2], s=50, color="purple")
+    ax1.scatter(latAB[:,1], latAB[:,2], s=70, color="purple")
     push!(legend, "AB points")
 catch e
     println("No AB points")
 end
 try 
-    ax1.scatter(latBB[:,1], latBB[:,2], s=20, color="magenta")
+    ax1.scatter(latBB[:,1], latBB[:,2], s=10, color="magenta")
     push!(legend, "BB points")
 catch e
     println("No BB points")
@@ -119,6 +119,6 @@ ax1.set_xlim([-400, 400])
 ax1.set_ylim([-400, 400])
 ax1.set_aspect("equal")
 
-ax1.legend(legend)
+# ax1.legend(legend)
 
 show()

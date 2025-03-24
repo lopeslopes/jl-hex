@@ -11,10 +11,10 @@ using StatsBase
 
 spglib = pyimport("spglib")
 
-latAA = read_lattice_3d("data/0.3802512/latticeAA.dat")
-latBA = read_lattice_3d("data/0.3802512/latticeBA.dat")
-latAB = read_lattice_3d("data/0.3802512/latticeAB.dat")
-latBB = read_lattice_3d("data/0.3802512/latticeBB.dat")
+latAA = read_lattice_3d("data/0.0192444/latticeAA.dat")
+latBA = read_lattice_3d("data/0.0192444/latticeBA.dat")
+latAB = read_lattice_3d("data/0.0192444/latticeAB.dat")
+latBB = read_lattice_3d("data/0.0192444/latticeBB.dat")
 
 origin = [0.0, 0.0, 0.0]
 tree = KDTree(transpose(latAB))
@@ -84,14 +84,14 @@ for i in 1:n_rot
         new_spin_test = gen_rot * spin_test
         ds = new_spin_test .- new_p
         gc = 0
-        # for pt_cell in neighbors
-        #     if (isapprox(new_p, pt_cell))
-        #         gc = gc + Int(round(ds[3]))
-        #     end
-        # end
-        if (isapprox(new_p, pn))
-            gc = gc + 1 #Int(round(ds[3]))
+        for pt_cell in neighbors
+            if (isapprox(new_p, pt_cell))
+                gc = gc + Int(round(ds[3]))
+            end
         end
+        # if (isapprox(new_p, pn))
+        #     gc = gc + 1 #Int(round(ds[3]))
+        # end
         grp_chr[i] = grp_chr[i] + gc
     end
 
