@@ -2,7 +2,7 @@ module HexUtils
 
 using LinearAlgebra
 
-export create_honeycomb_lattice!, write_lattice, rotate_lattice!, rotate_point!, read_lattice, read_lattice_3d, analyze_sym_op!
+export create_honeycomb_lattice!, write_lattice, rotate_lattice!, rotate_point!, read_lattice, read_lattice_3d, analyze_sym_op!, magic_angle, write_properties, read_properties
 
 
 function create_honeycomb_lattice!(latticeA::Array{Float64,2}, latticeB::Array{Float64,2}, a::Float64, ab_stacking::Bool)
@@ -224,6 +224,48 @@ function analyze_sym_op!(rot_matrix, grp_chr_names, i, lattice_vecs)
     end
 
     return axis, angle
+end
+
+function magic_angle(p, q)
+    angle = acos((3.0*(q^2) - (p^2))/(3.0*(q^2) + (p^2))) 
+end
+
+function write_properties(p, q, i, steps, filename)
+    open(filename, "w") do file
+        println(file, "p=", p)
+        println(file, "q=", q)
+        println(file, "i=", i)
+        println(file, "steps=", steps)
+    end
+end
+
+function read_properties(path)
+    p = 0
+    q = 0
+    i = 0
+    steps = 0
+    open(path*"properties.dat", "r") do file
+        data = readlines(file)
+        for line in data
+            if line != "\n"
+                aux = split(line, "=")
+                if aux[1] == "p"
+                    aux_p = parse(Float64, aux[2])
+                    p = trunc(Int, aux_p)
+                elseif aux[1] == "q"
+                    aux_q = parse(Float64, aux[2])
+                    q = trunc(Int, aux_q)
+                elseif aux[1] == "i"
+                    aux_i = parse(Float64, aux[2])
+                    i = trunc(Int, aux_i)
+                elseif aux[1] == "steps"
+                    aux_steps = parse(Float64, aux[2])
+                    steps = trunc(Int, aux_steps)
+                end
+            end
+        end
+    end
+    return p, q, i, steps
 end
 
 end

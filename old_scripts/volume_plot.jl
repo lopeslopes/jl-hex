@@ -1,6 +1,4 @@
-using PyCall
-pygui(:qt5)
-using PyPlot
+using WGLMakie
 
 
 angle = []
@@ -19,11 +17,15 @@ open("cell_volume.dat", "r") do file
     end
 end
 
-ax1 = subplot(111)
-#ax1.scatter(angle, vol_ws)
-ax1.scatter(angle, vol_pv, s=50)
 
-ax1.set_xlabel("Angle (rad)")
-ax1.set_ylabel("Volume (angstron squared)")
+with_theme(theme_latexfonts()) do
+    fig = Figure()
+    ax1 = Axis(fig[1, 1],
+               title = "Area of unit cell",
+               xlabel = L"\theta\, (\text{rad})",
+               ylabel = L"\text{Area}\, (\AA^2)")
 
-show()
+    scatter!(ax1, angle, vol_pv, label="Volume")
+    # axislegend(position = :rb)
+    save("test_plot.png", fig)
+end
