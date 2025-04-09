@@ -1,7 +1,26 @@
-import fastplotlib as fpl
 import numpy as np
 from pathlib import Path
-import matplotlib.pyplot as plt
+import holoviews as hv
+from holoviews.operation.datashader import rasterize
+from PIL import Image, ImageChops
+
+hv.extension('bokeh')
+
+
+def trim(image_path, output_path=None, border_color=(255, 255, 255)):
+    img = Image.open(image_path).convert("RGB")
+    bg = Image.new("RGB", img.size, border_color)
+    diff = ImageChops.difference(img, bg)
+    bbox = diff.getbbox()
+    if bbox:
+        cropped = img.crop(bbox)
+        if output_path:
+            cropped.save(output_path)
+        return cropped
+    else:
+        print("No borders found (image likely fully solid or transparent).")
+        return img
+
 
 # -- Load data
 def load_lattice(path):
@@ -10,6 +29,7 @@ def load_lattice(path):
             [np.float64(x) for x in line.split(";")]
             for line in f if line.strip()  # skip empty lines
         ])
+
 
 # -- Load properties
 def load_properties(path):
@@ -31,7 +51,6 @@ def load_properties(path):
                 elif aux[0] == "steps":
                     steps = int(float(aux[1]))
     return p, q, i, steps
-                
 
 
 base_data_path = Path("data")
@@ -44,7 +63,7 @@ a = 2.46
 p, q, j, steps = load_properties(dataset_dirs[k])
 angle_i = np.acos((3.0*(q**2) - (p**2))/(3.0*(q**2) + (p**2)))
 angle_f = np.acos((3.0*((q-1)**2) - (p**2))/(3.0*((q-1)**2) + (p**2)))
-angle = angle_i + (j/steps)*(angle_f  - angle_i)
+angle = angle_i + (j/steps)*(angle_f - angle_i)
 print("Angle in radians: ", angle)
 print("Angle in degrees: ", (angle * 180) / np.pi)
 moire_period = a/(2*np.sin(angle/2))
@@ -61,34 +80,11 @@ latAB = load_lattice(dataset_dirs[k] / "latticeAB.dat")
 latBB = load_lattice(dataset_dirs[k] / "latticeBB.dat")
 
 # -- Combine data
-cloud = np.vstack([latA1,
-                   latB1,
-                   latA2,
-                   latB2])
-n_A1, n_B1, n_A2, n_B2 = map(len, (latA1, latB1, latA2, latB2))
-colors = ["yellow"] * n_A1 + ["yellow"] * n_B1 + ["red"] * n_A2 + ["red"] * n_B2
-
-
-n_AA, n_BA, n_AB, n_BB = map(len, (latAA, latBA, latAB, latBB))
-stack_sup = []
-if n_AA != 0:
-    stack_sup.append(latAA)
-if n_BA != 0:
-    stack_sup.append(latBA)
-if n_AB != 0:
-    stack_sup.append(latAB)
-if n_BB != 0:
-    stack_sup.append(latBB)
-    
-cloud_superposition = np.vstack(stack_sup)
-colors_superposition = ["cyan"] * n_AA + ["magenta"] * n_BA + ["purple"] * n_AB + ["blue"] * n_BB
-
 r = moire_period
 theta = np.linspace(0, 2 * np.pi, 200)
 x = r * np.cos(theta)
 y = r * np.sin(theta)
 circle_data = np.stack([x, y], axis=1)
-
 
 r = moire_period*2.0
 theta = np.linspace(0, 2 * np.pi, 200)
@@ -97,49 +93,26 @@ y = r * np.sin(theta)
 circle_data2 = np.stack([x, y], axis=1)
 
 
-figure = fpl.Figure(size=(800, 800))
-figure[0, 0].add_scatter(data=cloud, sizes=0.3, colors=colors, alpha=0.8)
-figure[0, 0].add_scatter(data=cloud_superposition, sizes=15, colors=colors_superposition, alpha=1.0)
-figure[0, 0].add_line(data=circle_data, thickness=5, colors="blue")
-figure[0, 0].add_line(data=circle_data2, thickness=5, colors="green")
+### holoviews plot ###
+all_pts = np.concatenate((latA1, latB1, latA2, latB2))
+points_total = hv.Points(all_pts)
 
-# Render and save the figure
-fig_mpl = figure.export_numpy()
-ax1 = plt.subplot(111)
-ax1.imshow(fig_mpl)
-plt.show()
+raster1 = rasterize(points_total, width=800, height=800)
+raster1 = raster1.opts(
+    cmap='bmy',
+    colorbar=True,
+    frame_width=800,
+    title="Moire Pattern Visualization",
+    aspect="equal"
+)
 
-# Give the renderer a bit of time to draw
-# import time
-# time.sleep(1)
-#
-# # Export to file
-# figure.export("moire_output.png")
+pointsAB = hv.Points(latAB).opts(size=10)
+pointsBA = hv.Points(latBA).opts(size=10)
+circ1 = hv.Curve(circle_data)
+circ2 = hv.Curve(circle_data2)
 
-# build offscreen renderer explicitly
-# from fastplotlib.layouts import GridPlot
-# from fastplotlib.renderers import OffscreenCanvas
-# from PIL import Image
-# import numpy as np
-#
-# # create the plot manually in offscreen context
-# canvas = OffscreenCanvas(size=(800, 800))
-# grid = GridPlot(canvas=canvas)
-# canvas.add_scene(grid)
-#
-# plot = grid[0, 0]
-# plot.add_scatter(data=cloud, sizes=0.3, colors=colors, alpha=0.8)
-# plot.add_scatter(data=cloud_superposition, sizes=15, colors=colors_superposition, alpha=1.0)
-# plot.add_line(data=circle_data, thickness=5, colors="blue")
-# plot.add_line(data=circle_data2, thickness=5, colors="green")
+overlap = pointsAB * pointsBA * circ1 * circ2
 
-## -- Plot
-# figure = fpl.Figure(size=(800, 800))
-# figure[0, 0].add_scatter(data=cloud, sizes=0.3, colors=colors, alpha=0.8)
-# figure[0, 0].add_scatter(data=cloud_superposition, sizes=15, colors=colors_superposition, alpha=1.0)
-#
-# figure[0, 0].add_line(data=circle_data, thickness=5, colors="blue")
-# figure[0, 0].add_line(data=circle_data2, thickness=5, colors="green")
-#
-#
-# figure.export("test.png")
+overlay = raster1 * overlap
+hv.save(overlay, 'my_plot.png', fmt='png', backend='bokeh')
+trim('my_plot.png', 'my_plot.png')
