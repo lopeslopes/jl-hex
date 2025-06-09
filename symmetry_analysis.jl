@@ -1,133 +1,107 @@
 include("hex_utils.jl")
 using .HexUtils
 using PyCall
-using PyCall: LinearAlgebra
-pygui(:qt5)
 using PyPlot
+using LinearAlgebra
 using NearestNeighbors
 using Printf
 using Combinatorics
 using StatsBase
+using Crystalline
 
-spglib = pyimport("spglib")
 
-latAA = read_lattice_3d("data/0.0192444/latticeAA.dat")
-latBA = read_lattice_3d("data/0.0192444/latticeBA.dat")
-latAB = read_lattice_3d("data/0.0192444/latticeAB.dat")
-latBB = read_lattice_3d("data/0.0192444/latticeBB.dat")
+sg = spacegroup(191, 3)
+db = directbasis(191, 3)
 
-origin = [0.0, 0.0, 0.0]
-tree = KDTree(transpose(latAB))
-ind_nbors, dist_nbors = knn(tree, origin, 7)
-neighbors = [latAB[i,:] for i in ind_nbors]
+base_data_path = "data"
+entries = readdir(base_data_path; join=true)
+dataset_dirs = sort(filter(isdir, entries))
+n_datasets = length(dataset_dirs)
 
-a1 = neighbors[1][:]
-aux = [a1[1], a1[2]]
-origin_2d = [origin[1], origin[2]]
-rotate_point!(aux, (2.0/3.0)*pi, origin_2d)
-ind_a2, dist_a2 = nn(tree, [aux[1], aux[2], 0.0])
-a2 = latAB[ind_a2,:]
+for path in dataset_dirs
+    println(path)
+    angle, moire_period, max_radius = read_properties(path)
 
-lattice =  [[a1[1], a1[2], a1[3]],
-            [a2[1], a2[2], a2[3]],
-            [  0.0,   0.0, 1000000.0]]
+    steps = 500
+    r_step = (max_radius - 0.2)/steps
+    for i in 1:500
+        radius = 0.2 + i*((max_radius-r_step)-0.2)/steps
 
-positions = [[0.0, 0.0, 0.0]]
-numbers = [1]
+        latA1 = transpose(read_lattice_3d(path*"/latticeA1.dat", radius+(r_step/2), radius-(r_step/2)))
+        latB1 = transpose(read_lattice_3d(path*"/latticeB1.dat", radius+(r_step/2), radius-(r_step/2)))
+        latA2 = transpose(read_lattice_3d(path*"/latticeA2.dat", radius+(r_step/2), radius-(r_step/2)))
+        latB2 = transpose(read_lattice_3d(path*"/latticeB2.dat", radius+(r_step/2), radius-(r_step/2)))
 
-graphene = (lattice, positions, numbers)
-sym_data = spglib.get_symmetry_dataset(graphene)
-
-n_rot = size(sym_data.rotations)[1]
-n_trans = size([sym_data.translations[i,:] for i in 1:size(sym_data.translations)[1] if sym_data.translations[i,:] != [0.0, 0.0, 0.0]])[1]
-
-println("Group number:           ", sym_data.number)
-println("Hall number:            ", sym_data.hall_number)
-println("International notation: ", sym_data.international)
-println("Rotations:              ", n_rot)
-println("Translations:           ", n_trans)
-
-grp_chr_names = ["" for i in 1:n_rot]
-grp_chr = zeros(Int, n_rot)
-
-# ax1 = subplot(111, projection="3d")
-
-for i in 1:n_rot
-    rot = sym_data.rotations[i,:,:]
-    det = LinearAlgebra.det(rot)
-
-    rot_axis, rot_angle = analyze_sym_op!(rot, grp_chr_names, i, lattice)
-
-    gen_rot = zeros(Float64, 3, 3)
-    for m in 1:3
-        for l in 1:3
-            aux_set = Set([1, 2, 3])
-            delete!(aux_set, m)
-            delete!(aux_set, l)
-            n = first(aux_set)
-            gen_rot[m, l] = (m == l) * cos(rot_angle) +
-                            (det - cos(rot_angle)) * rot_axis[m] * rot_axis[l] -
-                            sin(rot_angle) * levicivita([m, l, n]) * rot_axis[n]
+        if (isempty(latA1) || isempty(latB1) || isempty(latA2) || isempty(latB2))
+            continue
         end
-    end
+        treeA1 = KDTree(latA1)
+        treeB1 = KDTree(latB1)
+        treeA2 = KDTree(latA2)
+        treeB2 = KDTree(latB2)
 
-    new_points = []
-    op_viz = []
-    for jj in 1:7
-        # POINT
-        pn = neighbors[jj][1:3]
-        new_p = gen_rot * pn
-        push!(new_points, real(new_p))
-        
-        # SPIN TESTING
-        spin_test = pn .+ [0.0, 0.0, 1.0]
-        new_spin_test = gen_rot * spin_test
-        ds = new_spin_test .- new_p
-        gc = 0
-        for pt_cell in neighbors
-            if (isapprox(new_p, pt_cell))
-                gc = gc + Int(round(ds[3]))
+        tol = 1e-8
+        notable_points = []
+        for test_point in eachcol(latA1)
+            ops_A1 = []
+            ops_B1 = []
+            ops_A2 = []
+            ops_B2 = []
+            ops_no_match = []
+            for op in sg
+                flag = 0
+                gen_rot = cartesianize(op, db)
+                new_p = gen_rot.rotation * test_point
+
+                indA1, distA1 = nn(treeA1, new_p)
+                indB1, distB1 = nn(treeB1, new_p)
+                indA2, distA2 = nn(treeA2, new_p)
+                indB2, distB2 = nn(treeB2, new_p)
+
+                if distA1 < tol
+                    push!(ops_A1, op)
+                    flag = flag + 1
+                end
+                if distB1 < tol
+                    push!(ops_B1, op)
+                    flag = flag + 1
+                end
+                if distA2 < tol
+                    push!(ops_A2, op)
+                    flag = flag + 1
+                end
+                if distB2 < tol
+                    push!(ops_B2, op)
+                    flag = flag + 1
+                end
+                if flag == 0
+                    push!(ops_no_match, op)
+                end
+            end
+
+            num_op_not_a1_a1 = size(ops_B1)[1] + size(ops_A2)[1] + size(ops_B2)[1] + size(ops_no_match)[1]
+            if num_op_not_a1_a1 > 0
+                push!(notable_points, test_point)
             end
         end
-        # if (isapprox(new_p, pn))
-        #     gc = gc + 1 #Int(round(ds[3]))
-        # end
-        grp_chr[i] = grp_chr[i] + gc
-    end
+        notable_points = hcat(notable_points...)
 
-    new_points = hcat(new_points...)
-    # ax1.scatter(new_points[1, :], new_points[2, :], new_points[3, :])
-end
-
-count_dict = countmap(grp_chr_names)
-chr_unique = zeros(Int, length(count_dict))
-names_unique = ["" for i in 1:length(count_dict)]
-
-for (j, op) in enumerate(keys(count_dict))
-    ind = findall(name==op for name in grp_chr_names)
-    names_unique[j] = op
-    chr_final = 0
-    cont = 0
-    for i in ind
-        if grp_chr[i] != chr_final
-            chr_final = grp_chr[i]
-            cont += 1
+        if isempty(notable_points)
+            # println("   Num. notable points: 0")
+        else
+            println("   Radius: ", radius)
+            println("       Num. notable points: ", size(notable_points)[2])
         end
     end
-    chr_unique[j] = chr_final
 end
 
-println("----------------------------")
-println("CHARACTERES")
-println(lpad("sym_op", 9), lpad("chr", 5), lpad("mult", 6))
-for (n, c) in zip(names_unique, chr_unique)
-    mult = count_dict[n]
-    println(lpad(n, 9), lpad(string(c), 5), lpad(string(mult), 6))
-end
-
-# ax1.set_box_aspect((1, 1, 1))
-# ax1.set_xlim([-10.0, 10.0])
-# ax1.set_ylim([-10.0, 10.0])
-# ax1.set_zlim([-10.0, 10.0])
+# latA1 = transpose(read_lattice_3d(path*"/latticeAB.dat"))
+# # latB1 = transpose(read_lattice_3d(path*"/latticeB1.dat", radius+(r_step/2), radius-(r_step/2)))
+# # latA2 = transpose(read_lattice_3d(path*"/latticeA2.dat", radius+(r_step/2), radius-(r_step/2)))
+# # latB2 = transpose(read_lattice_3d(path*"/latticeB2.dat", radius+(r_step/2), radius-(r_step/2)))
 #
+# ax1 = subplot(111)
+# ax1.scatter(latA1[1, :], latA1[2, :])
+#
+# ax1.set_aspect("equal")
 # show()

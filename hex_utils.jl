@@ -2,7 +2,7 @@ module HexUtils
 
 using LinearAlgebra
 
-export create_honeycomb_lattice!, write_lattice, rotate_lattice!, rotate_point!, read_lattice, read_lattice_3d, analyze_sym_op!, magic_angle, write_properties, read_properties
+export create_honeycomb_lattice!, write_lattice, rotate_lattice!, rotate_point!, read_lattice, read_lattice_3d, magic_angle, write_properties, read_properties
 
 
 function create_honeycomb_lattice!(latticeA::Array{Float64,2}, latticeB::Array{Float64,2}, a::Float64, ab_stacking::Bool)
@@ -56,15 +56,20 @@ function create_honeycomb_lattice!(latticeA::Array{Float64,2}, latticeB::Array{F
     end
 end
 
-function write_lattice(lattice, filename)
+function write_lattice(lattice, filename, max_dist=0.0, min_dist=0.0)
     open(filename, "w") do file
         for i = 1:size(lattice, 1)
-            println(file, lattice[i, 1], ";", lattice[i, 2])
+            dist = sqrt(lattice[i, 1]^2 + lattice[i, 2]^2)
+            if ((max_dist == 0.0) || (dist < max_dist))
+                if ((min_dist == 0.0) || (dist > min_dist))
+                    println(file, lattice[i, 1], ";", lattice[i, 2])
+                end
+            end
         end
     end
 end
 
-function read_lattice(filename, max_dist=0.0)
+function read_lattice(filename, max_dist=0.0, min_dist=0.0)
     lat = []
     open(filename, "r") do file
         data = readlines(file)
@@ -74,7 +79,9 @@ function read_lattice(filename, max_dist=0.0)
                 aux_v = [parse(Float64, aux[1]), parse(Float64, aux[2])]
                 dist = sqrt(aux_v[1]^2 + aux_v[2]^2)
                 if ((max_dist == 0.0) || (dist < max_dist))
-                    push!(lat, aux_v)
+                    if ((min_dist == 0.0) || (dist > min_dist))
+                        push!(lat, aux_v)
+                    end
                 end
             end
         end
@@ -122,120 +129,17 @@ function rotate_point!(point, angle, pivot)
     point .= aux1 .+ pivot
 end
 
-function analyze_sym_op!(rot_matrix, grp_chr_names, i, lattice_vecs)
-    trc = LinearAlgebra.tr(rot_matrix)
-    det = LinearAlgebra.det(rot_matrix)
-    solution = LinearAlgebra.eigen(rot_matrix)
-    values = solution.values
-    vectors = transpose(solution.vectors)
-
-    a1_norm = LinearAlgebra.norm(lattice_vecs[1, :])
-
-    p_aux = (lattice_vecs[2] + lattice_vecs[1]) / LinearAlgebra.norm(lattice_vecs[2] + lattice_vecs[1])
-    aux_v1 = lattice_vecs[1] / a1_norm
-    aux_v2 = lattice_vecs[2] / a1_norm
-    aux_v3 = (aux_v1 + p_aux) / LinearAlgebra.norm(aux_v1 + p_aux)
-    aux_v4 = (aux_v2 + p_aux) / LinearAlgebra.norm(aux_v2 + p_aux)
-    aux_v5 = (aux_v1 - aux_v2) / LinearAlgebra.norm(aux_v2 - aux_v1)
-    aux_v6 = p_aux / LinearAlgebra.norm(p_aux)
-    aux_axis = [aux_v1, aux_v2, aux_v3, aux_v4, aux_v5, aux_v6]
-
-    ax_ind = findall(isapprox(v, det) for v in values)
-
-    axis = real(vectors[ax_ind[end],1:3])
-    angle = acos((trc - det)/2)
-
-    if (det == 1.0)
-        if (trc == 3)
-            grp_chr_names[i] = "E"
-        elseif (trc == 2)
-            if ("C6" in grp_chr_names)
-                angle = angle + 2*(pi - angle)
-            end
-            grp_chr_names[i] = "C6"
-        elseif (trc == 0)
-            if ("C3" in grp_chr_names)
-                angle = angle + 2*(pi - angle)
-            end
-            grp_chr_names[i] = "C3"
-        elseif (trc == -1)
-            if (isapprox(axis, [1.0, 0.0, 0.0]))
-                grp_chr_names[i] = "C*2"
-                axis = aux_axis[5][:]
-            elseif (isapprox(axis, [0.0, 1.0, 0.0]))
-                grp_chr_names[i] = "C**2"
-                axis = aux_axis[6][:]
-            elseif (isapprox(axis, [0.0, 0.0, 1.0]))
-                grp_chr_names[i] = "C2"
-            elseif (isapprox(axis[1], axis[2]))
-                axis = aux_axis[3][:]
-                grp_chr_names[i] = "C*2"
-            elseif (isapprox(axis[1], -axis[2]))
-                axis = aux_axis[4][:]
-                grp_chr_names[i] = "C*2"
-            elseif (isapprox(axis[1], 2*axis[2]))
-                axis = aux_axis[1][:]
-                grp_chr_names[i] = "C**2"
-            elseif (isapprox(2*axis[1], axis[2]))
-                axis = aux_axis[2][:]
-                grp_chr_names[i] = "C**2"
-            end
-        end
-    elseif (det == -1.0)
-        if (trc == -3)
-            grp_chr_names[i] = "i"
-        elseif (trc == -2)
-            if ("S3" in grp_chr_names)
-                angle = angle + 2*(pi - angle)
-            end
-            grp_chr_names[i] = "S3"
-        elseif (trc == 0)
-            if ("S6" in grp_chr_names)
-                angle = angle + 2*(pi - angle)
-            end
-            grp_chr_names[i] = "S6"
-        elseif (trc == 1)
-            if (isapprox(axis, [1.0, 0.0, 0.0]))
-                grp_chr_names[i] = "sigma_v"
-                axis = aux_axis[5][:]
-            elseif (isapprox(axis, [0.0, 1.0, 0.0]))
-                grp_chr_names[i] = "sigma_d"
-                axis = aux_axis[6][:]
-            elseif (isapprox(axis, [0.0, 0.0, 1.0]))
-                grp_chr_names[i] = "sigma_h"
-            elseif (isapprox(axis[1], axis[2]))
-                axis = aux_axis[3][:]
-                grp_chr_names[i] = "sigma_v"
-            elseif (isapprox(axis[1], -axis[2]))
-                axis = aux_axis[4][:]
-                grp_chr_names[i] = "sigma_v"
-            elseif (isapprox(axis[1], 2*axis[2]))
-                axis = aux_axis[1][:]
-                grp_chr_names[i] = "sigma_d"
-            elseif (isapprox(2*axis[1], axis[2]))
-                axis = aux_axis[2][:]
-                grp_chr_names[i] = "sigma_d"
-            end
-        end
-    end
-
-    if (grp_chr_names[i] == "")
-        println(axis)
-    end
-
-    return axis, angle
-end
-
 function magic_angle(p, q)
     angle = acos((3.0*(q^2) - (p^2))/(3.0*(q^2) + (p^2))) 
 end
 
-function write_properties(p, q, i, steps, filename)
+function write_properties(p, q, i, steps, max_radius, filename)
     open(filename, "w") do file
         println(file, "p=", p)
         println(file, "q=", q)
         println(file, "i=", i)
         println(file, "steps=", steps)
+        println(file, "max_radius=", max_radius)
     end
 end
 
@@ -244,7 +148,8 @@ function read_properties(path)
     q = 0
     i = 0
     steps = 0
-    open(path*"properties.dat", "r") do file
+    max_radius = 0.0
+    open(path*"/properties.dat", "r") do file
         data = readlines(file)
         for line in data
             if line != "\n"
@@ -261,11 +166,21 @@ function read_properties(path)
                 elseif aux[1] == "steps"
                     aux_steps = parse(Float64, aux[2])
                     steps = trunc(Int, aux_steps)
+                elseif aux[1] == "max_radius"
+                    aux_radius = parse(Float64, aux[2])
+                    max_radius = aux_radius
                 end
             end
         end
     end
-    return p, q, i, steps
+    angle_i = acos((3.0*(q^2) - (p^2))/(3.0*(q^2) + (p^2)))
+    angle_f = acos((3.0*((q-1)^2) - (p^2))/(3.0*((q-1)^2) + (p^2)))
+    angle = angle_i + (i/steps)*(angle_f  - angle_i)
+
+    a = 2.46
+    moire_period = a/(2*sin(angle/2))
+
+    return angle, moire_period, max_radius
 end
 
 end
