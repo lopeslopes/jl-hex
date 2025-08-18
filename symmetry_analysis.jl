@@ -19,6 +19,9 @@ dataset_dirs = sort(filter(isdir, entries))
 n_datasets = length(dataset_dirs)
 
 for path in dataset_dirs
+    if (path[6:13] != "AA_stack")
+        continue
+    end
     println(path)
     angle, moire_period, max_radius = read_properties(path)
 

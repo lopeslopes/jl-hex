@@ -1,5 +1,5 @@
 version = 1
-revision = 2
+revision = 3
 requires-python = ">=3.13"
 
 [[package]]
@@ -187,6 +187,12 @@ wheels = [
 ]
 
 [[package]]
+name = "geckodriver"
+version = "0.0.1"
+source = { registry = "https://pypi.org/simple" }
+sdist = { url = "https://files.pythonhosted.org/packages/c2/f5/22e003ecf00fed7980e4dd1330d6873ed449971ac2febd9a6650d0cd24e5/geckodriver-0.0.1.tar.gz", hash = "sha256:58cd79641be83188cd4b53a02a1692bae72ae6eec0901725e992956dde98dbbf", size = 1041, upload-time = "2023-09-18T14:56:26.337Z" }
+
+[[package]]
 name = "h11"
 version = "0.14.0"
 source = { registry = "https://pypi.org/simple" }
@@ -243,6 +249,7 @@ dependencies = [
     { name = "bokeh" },
     { name = "colorcet" },
     { name = "datashader" },
+    { name = "geckodriver" },
     { name = "holoviews" },
     { name = "matplotlib" },
     { name = "pillow" },
@@ -256,6 +263,7 @@ requires-dist = [
     { name = "bokeh", specifier = ">=3.7.2" },
     { name = "colorcet", specifier = ">=3.1.0" },
     { name = "datashader", specifier = ">=0.17.0" },
+    { name = "geckodriver", specifier = ">=0.0.1" },
     { name = "holoviews", specifier = ">=1.20.2" },
     { name = "matplotlib", specifier = ">=3.10.1" },
     { name = "pillow", specifier = ">=11.1.0" },

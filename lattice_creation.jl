@@ -8,7 +8,7 @@ using Printf
 n = 200000
 a = 2.46
 hex_center_pivot = false
-AB_stacking = true
+AB_stacking = false
 
 # STACKING AND ORIGIN DEFINITION
 if AB_stacking

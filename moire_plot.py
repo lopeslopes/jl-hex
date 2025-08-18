@@ -55,10 +55,12 @@ def load_properties(path):
 
 # load available data folders
 base_data_path = Path("data")
-dataset_dirs = sorted([d for d in base_data_path.iterdir() if d.is_dir()])
+dataset_dirs = sorted([d for d in base_data_path.iterdir() if (d.is_dir() and (str(d)[5:13]=="AA_stack"))])
+# dataset_dirs = sorted([d for d in base_data_path.iterdir() if d.is_dir()])
+
 n_datasets = len(dataset_dirs)
-k = n_datasets-1
-for k in range(41,n_datasets):
+# k = n_datasets-1
+for k in range(n_datasets):
     print(dataset_dirs[k])
 
     # obtain lattice properties
@@ -98,7 +100,7 @@ for k in range(41,n_datasets):
 
 
     # holoviews plot
-    angle_name = str(dataset_dirs[k])[5:14]
+    angle_name = str(dataset_dirs[k])[14:23]
 
     all_pts = np.concatenate((latA1, latB1, latA2, latB2))
     points_total = hv.Points(all_pts)
@@ -110,7 +112,7 @@ for k in range(41,n_datasets):
         yaxis=None,
         frame_width=800,
         xlim=(-350, 350),
-        ylim=(-350, 350), 
+        ylim=(-350, 350),
         title=angle_name,
         aspect="equal"
     )

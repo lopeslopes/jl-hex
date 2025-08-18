@@ -2,7 +2,7 @@ module HexUtils
 
 using LinearAlgebra
 
-export create_honeycomb_lattice!, write_lattice, rotate_lattice!, rotate_point!, read_lattice, read_lattice_3d, magic_angle, write_properties, read_properties
+export create_honeycomb_lattice!, write_lattice, rotate_lattice!, rotate_point!, read_lattice, read_lattice_3d, magic_angle, write_properties, read_properties, cell_area
 
 
 function create_honeycomb_lattice!(latticeA::Array{Float64,2}, latticeB::Array{Float64,2}, a::Float64, ab_stacking::Bool)
@@ -181,6 +181,13 @@ function read_properties(path)
     moire_period = a/(2*sin(angle/2))
 
     return angle, moire_period, max_radius
+end
+
+function cell_area(a1, a2)
+    a1_3d = [a1[1], a1[2], 0.0]
+    a2_3d = [a2[1], a2[2], 0.0]
+    area_lat_cell = LinearAlgebra.norm(LinearAlgebra.cross(a1_3d, a2_3d))
+    return area_lat_cell
 end
 
 end
