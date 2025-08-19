@@ -6,35 +6,21 @@ using Printf
 
 # INITIAL DEFINITIONS
 n = 200000
-a = 2.46
-hex_center_pivot = false
+
+a_top = 2.46
+a1_top = [a_top, 0.0]
+a2_top = [-a_top*cos(pi/3.0), a_top*sin(pi/3.0)]
+
 AB_stacking = false
 
-# STACKING AND ORIGIN DEFINITION
-if AB_stacking
-    println("Stacking mode: AB (Bernal stacking)")
-else
-    println("Stacking mode: AA (no displacement)")
-end
-
-if hex_center_pivot
-    println("Pivot point: empty center of hexagonal cell")
-    d = sqrt((a^2) / (2 * (1 - cos(2 * pi / 3))))
-    d1 = [d * cos(pi / 6), d * sin(pi / 6)]
-    origin1 = d1 - [0.0, 0.0]
-    origin2 = d1
-else
-    println("Pivot point: node at origin")
-    origin1 = [0.0, 0.0]
-    origin2 = [0.0, 0.0]
-end
+rot_axis = [0.0, 0.0]
 
 # ALLOCATION OF LATTICES AND FIRST CREATION
 println("Creating lattices...")
 latA1 = zeros(n ÷ 2, 2)
 latB1 = zeros(n ÷ 2, 2)
 
-HexUtils.create_honeycomb_lattice!(latA1, latB1, a, false)
+HexUtils.create_honeycomb_lattice!(latA1, latB1, a_top, a1_top, a2_top, false)
 
 max_radius = maximum(latA1) - 10.0
 
@@ -54,18 +40,21 @@ for q in [63.0, 62.0, 61.0, 60.0, 59.0, 58.0, 57.0, 56.0]
     for j in 1:steps
         latA2 = zeros(n ÷ 2, 2)
         latB2 = zeros(n ÷ 2, 2)
-        HexUtils.create_honeycomb_lattice!(latA2, latB2, a, AB_stacking)
+
+        a_bot = 2.46
+        a1_bot = [a_bot, 0.0]
+        a2_bot = [-a_bot*cos(pi/3.0), a_bot*sin(pi/3.0)]
+
+        HexUtils.create_honeycomb_lattice!(latA2, latB2, a_bot, a1_bot, a2_bot, AB_stacking)
 
         angle = angle_i + j*(angle_f - angle_i)/10
-
+        ang_name = @sprintf("%9.7f", angle)
         println("Angle in radians: ", angle)
         println("Angle in degrees: ", (angle * 180) / pi)
 
-        ang_name = @sprintf("%9.7f", angle)
-
         # ROTATE SECOND LATTICE BY THE ANGLE
-        rotate_lattice!(latA2, angle, origin2)
-        rotate_lattice!(latB2, angle, origin2)
+        rotate_lattice!(latA2, angle, rot_axis)
+        rotate_lattice!(latB2, angle, rot_axis)
 
         tol = 5.0e-3
         println("Tolerance:        ", tol)
@@ -100,60 +89,51 @@ for q in [63.0, 62.0, 61.0, 60.0, 59.0, 58.0, 57.0, 56.0]
         latAB = transpose(hcat(AB...))
         latBB = transpose(hcat(BB...))
 
-        try
-            mkdir("data/"*ang_name*"_200k")
+        try mkdir("data/"*ang_name*"_200k")
         catch e
         end
 
-        try
-            write_lattice(latAA, "data/"*ang_name*"_200k/latticeAA.dat", max_radius)
+        try write_lattice(latAA, "data/"*ang_name*"_200k/latticeAA.dat", max_radius)
         catch e
             println("AA lattice is empty!")
         end
 
-        try
-            write_lattice(latBA, "data/"*ang_name*"_200k/latticeBA.dat", max_radius)
+        try write_lattice(latBA, "data/"*ang_name*"_200k/latticeBA.dat", max_radius)
         catch e
             println("BA lattice is empty!")
         end
 
-        try
-            write_lattice(latAB, "data/"*ang_name*"_200k/latticeAB.dat", max_radius)
+        try write_lattice(latAB, "data/"*ang_name*"_200k/latticeAB.dat", max_radius)
         catch e
             println("AB lattice is empty!")
         end
 
-        try
-            write_lattice(latBB, "data/"*ang_name*"_200k/latticeBB.dat", max_radius)
+        try write_lattice(latBB, "data/"*ang_name*"_200k/latticeBB.dat", max_radius)
         catch e
             println("BB lattice is empty!")
         end
 
         # WRITING POINTS OUT OF OVERLAP
-        try
-            write_lattice(latA1, "data/"*ang_name*"_200k/latticeA1.dat", max_radius)
+        try write_lattice(latA1, "data/"*ang_name*"_200k/latticeA1.dat", max_radius)
         catch e
             println("A1 lat is empty!")
         end
 
-        try
-            write_lattice(latB1, "data/"*ang_name*"_200k/latticeB1.dat", max_radius)
+        try write_lattice(latB1, "data/"*ang_name*"_200k/latticeB1.dat", max_radius)
         catch e
             println("B1 lattice is empty!")
         end
 
-        try
-            write_lattice(latA2, "data/"*ang_name*"_200k/latticeA2.dat", max_radius)
+        try write_lattice(latA2, "data/"*ang_name*"_200k/latticeA2.dat", max_radius)
         catch e
             println("A2 lat is empty!")
         end
 
-        try
-            write_lattice(latB2, "data/"*ang_name*"_200k/latticeB2.dat", max_radius)
+        try write_lattice(latB2, "data/"*ang_name*"_200k/latticeB2.dat", max_radius)
         catch e
             println("B2 lat is empty!")
         end
 
-        write_properties(p, q, j, steps, max_radius, "data/"*ang_name*"_200k/properties.dat")
+        write_properties(p, q, j, steps, max_radius, a_top, a1_top, a2_top, a_bot, a1_bot, a2_bot, "data/"*ang_name*"_200k/properties.dat")
     end
 end

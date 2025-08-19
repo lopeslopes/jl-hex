@@ -5,13 +5,18 @@ using LinearAlgebra
 export create_honeycomb_lattice!, write_lattice, rotate_lattice!, rotate_point!, read_lattice, read_lattice_3d, magic_angle, write_properties, read_properties, cell_area
 
 
-function create_honeycomb_lattice!(latticeA::Array{Float64,2}, latticeB::Array{Float64,2}, a::Float64, ab_stacking::Bool)
-    num_columns = 2*div(isqrt(size(latticeA,1)*2),3)
-    angle = (60.0/180.0) * π
+function create_honeycomb_lattice!(latticeA, latticeB, a, a1, a2, ab_stacking)
+    if AB_stacking
+        println("Stacking mode: AB (Bernal stacking)")
+    else
+        println("Stacking mode: AA (no displacement)")
+    end
 
-    v1 = [a, 0.0]
-    v2 = [a*cos(angle), a*sin(angle)]
-    v3 = [-a*cos(angle), a*sin(angle)]
+    num_columns = 2*div(isqrt(size(latticeA,1)*2),3)
+
+    v1 = a1
+    v2 = [a*cos(pi/3.0), a*sin(pi/3.0)]
+    v3 = a2
 
     d = sqrt((a^2)/(2.0*(1.0-cos(2.0*angle))))
     d1 = [d*cos(angle/2.0), d*sin(angle/2.0)]
@@ -133,13 +138,19 @@ function magic_angle(p, q)
     angle = acos((3.0*(q^2) - (p^2))/(3.0*(q^2) + (p^2))) 
 end
 
-function write_properties(p, q, i, steps, max_radius, filename)
+function write_properties(p, q, i, steps, max_radius, a_top, a1_top, a2_top, a_bot, a1_bot, a2_bot, filename)
     open(filename, "w") do file
         println(file, "p=", p)
         println(file, "q=", q)
         println(file, "i=", i)
         println(file, "steps=", steps)
         println(file, "max_radius=", max_radius)
+        println(file, "a_top=", a_top)
+        println(file, "a1_top=", a1_top)
+        println(file, "a2_top=", a2_top)
+        println(file, "a_bot=", a_bot)
+        println(file, "a1_bot=", a1_bot)
+        println(file, "a2_bot=", a2_bot)
     end
 end
 
@@ -169,6 +180,24 @@ function read_properties(path)
                 elseif aux[1] == "max_radius"
                     aux_radius = parse(Float64, aux[2])
                     max_radius = aux_radius
+                elseif aux[1] == "a_top"
+                    aux_atop = parse(Float64, aux[2])
+                    a_top = aux_atop
+                elseif aux[1] == "a1_top"
+                    aux_a1top = parse(Float64, aux[2])
+                    a1_top = aux_a1top
+                elseif aux[1] == "a2_top"
+                    aux_a2top = parse(Float64, aux[2])
+                    a2_top = aux_a2top
+                elseif aux[1] == "a_bot"
+                    aux_abot = parse(Float64, aux[2])
+                    a_bot = aux_abot
+                elseif aux[1] == "a1_bot"
+                    aux_a1bot = parse(Float64, aux[2])
+                    a1_bot = aux_a1bot
+                elseif aux[1] == "a2_bot"
+                    aux_a2bot = parse(Float64, aux[2])
+                    a2_bot = aux_a2bot
                 end
             end
         end
