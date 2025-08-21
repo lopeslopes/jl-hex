@@ -6,7 +6,7 @@ export create_honeycomb_lattice!, write_lattice, rotate_lattice!, rotate_point!,
 
 
 function create_honeycomb_lattice!(latticeA, latticeB, a, a1, a2, ab_stacking)
-    if AB_stacking
+    if ab_stacking
         println("Stacking mode: AB (Bernal stacking)")
     else
         println("Stacking mode: AA (no displacement)")
@@ -18,8 +18,8 @@ function create_honeycomb_lattice!(latticeA, latticeB, a, a1, a2, ab_stacking)
     v2 = [a*cos(pi/3.0), a*sin(pi/3.0)]
     v3 = a2
 
-    d = sqrt((a^2)/(2.0*(1.0-cos(2.0*angle))))
-    d1 = [d*cos(angle/2.0), d*sin(angle/2.0)]
+    d = sqrt((a^2)/(2.0*(1.0-cos(2.0*(pi/3.0)))))
+    d1 = [d*cos((pi/3.0)/2.0), d*sin((pi/3.0)/2.0)]
 
     origin_a = [0.0, 0.0]
     origin_b = origin_a + d1
