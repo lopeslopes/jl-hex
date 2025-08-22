@@ -28,10 +28,10 @@ with open("AAstack_separations") as f:
 
 
 ax1 = plt.subplot()
-ax1.plot(angles, AA)
-ax1.plot(angles, BA)
-ax1.plot(angles, AB)
-ax1.plot(angles, BB)
+ax1.plot(angles, AA, color="c")
+ax1.plot(angles, BA, color="orange")
+ax1.plot(angles, AB, color="green")
+ax1.plot(angles, BB, color="red")
 
 plt.legend(["AA", "BA", "AB", "BB"])
 plt.ylim((0,0.03))

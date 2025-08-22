@@ -11,7 +11,7 @@ a_top = 2.46
 a1_top = [a_top, 0.0]
 a2_top = [-a_top*cos(pi/3.0), a_top*sin(pi/3.0)]
 
-AB_stacking = false
+AB_stacking = true
 
 rot_axis = [0.0, 0.0]
 
@@ -28,14 +28,14 @@ treeA1 = KDTree(transpose(latA1))
 treeB1 = KDTree(transpose(latB1))
 
 # for q in [63.0, 62.0, 61.0, 60.0, 59.0, 58.0, 57.0, 56.0]
-for q in [61.0, 60.0, 59.0, 58.0, 57.0]
+for q in [61.0, 60.0, 59.0, 58.0]
     p = 1.0
     # q = 56.0
     angle_i = acos((3.0*(q^2) - (p^2))/(3.0*(q^2) + (p^2)))
     angle_f = acos((3.0*((q-1)^2) - (p^2))/(3.0*((q-1)^2) + (p^2)))
     println(angle_i)
     println(angle_f)
-    steps = 100
+    steps = 200
 
     for j in 1:steps
         latA2 = zeros(n ÷ 2, 2)
