@@ -4,100 +4,119 @@ using NearestNeighbors
 using Printf
 
 
+## finding smallest separation and corresponding angle
+angles = Float64[]
+AA_sep = Float64[]
+BA_sep = Float64[]
+AB_sep = Float64[]
+BB_sep = Float64[]
+
+open("AAstack_separations", "r") do f
+    for line in eachline(f)
+        if startswith(line, "0.")
+            push!(angles, parse(Float64, line))
+        elseif startswith(line, "AA:")
+            aux = split(line, ":")
+            push!(AA_sep, parse(Float64, aux[2]))
+        elseif startswith(line, "BA:")
+            aux = split(line, ":")
+            push!(BA_sep, parse(Float64, aux[2]))
+        elseif startswith(line, "AB:")
+            aux = split(line, ":")
+            push!(AB_sep, parse(Float64, aux[2]))
+        elseif startswith(line, "BB:")
+            aux = split(line, ":")
+            push!(BB_sep, parse(Float64, aux[2]))
+        end
+    end
+end
+
+min_index = argmin(AB_sep)
+println("Angle:      ", angles[min_index])
+println("Separation: ", AB_sep[min_index])
+
+
+## TODO: generate distorted lattices A2 and B2, based on the found separation
+
+
+
+## finding AA, AB, BA, BB points for the angle and new A2, B2 lattices
 base_data_path = "data"
 entries = readdir(base_data_path; join=true)
 dataset_dirs = sort(filter(isdir, entries))
 n_datasets = length(dataset_dirs)
 
-smallest_AA_separation = 10000.0
-AA_vector_separation = [0.0, 0.0]
+path = dataset_dirs[min_index]
+angle_name = path[findfirst("_",path)[1]+1:findlast("_", path)[1]-1]
+println(angle_name)
 
-smallest_BA_separation = 10000.0
-BA_vector_separation = [0.0, 0.0]
+latA1 = transpose(read_lattice_3d(path*"/latticeA1.dat"))
+latB1 = transpose(read_lattice_3d(path*"/latticeB1.dat"))
+latA2 = transpose(read_lattice_3d(path*"/latticeA2.dat"))
+latB2 = transpose(read_lattice_3d(path*"/latticeB2.dat"))
 
-smallest_AB_separation = 10000.0
-AB_vector_separation = [0.0, 0.0]
+treeA1 = KDTree(latA1)
+treeB1 = KDTree(latB1)
 
-smallest_BB_separation = 10000.0
-BB_vector_separation = [0.0, 0.0]
+latA1 = transpose(latA1)
+latB1 = transpose(latB1)
+latA2 = transpose(latA2)
+latB2 = transpose(latB2)
 
-# path = last(dataset_dirs)
-for path in dataset_dirs
-    angle_name = path[findfirst("/",path)[1]+1:findlast("_", path)[1]-1]
-    println(angle_name)
+tol = 5.0e-3
+println("Tolerance:        ", tol)
+name = @sprintf("%6.4f", tol)
 
-    latA1 = transpose(read_lattice_3d(path*"/latticeA1.dat"))
-    latB1 = transpose(read_lattice_3d(path*"/latticeB1.dat"))
-    latA2 = transpose(read_lattice_3d(path*"/latticeA2.dat"))
-    latB2 = transpose(read_lattice_3d(path*"/latticeB2.dat"))
+AA = []
+BA = []
+AB = []
+BB = []
 
-    treeA1 = KDTree(latA1)
-    treeB1 = KDTree(latB1)
-    treeA2 = KDTree(latA2)
-    treeB2 = KDTree(latB2)
+n = minimum([size(latA1)[1], size(latB1)[1], size(latA2)[1], size(latB2)[1]])
 
-    latA1 = transpose(latA1)
-    latB1 = transpose(latB1)
-    latA2 = transpose(latA2)
-    latB2 = transpose(latB2)
-
-    AA = []
-    BA = []
-    AB = []
-    BB = []
-
-    n = minimum([size(latA1)[1], size(latB1)[1], size(latA2)[1], size(latB2)[1]])
-
-    global smallest_AA_separation = 10000.0
-    global AA_vector_separation = [0.0, 0.0]
-
-    global smallest_BA_separation = 10000.0
-    global BA_vector_separation = [0.0, 0.0]
-
-    global smallest_AB_separation = 10000.0
-    global AB_vector_separation = [0.0, 0.0]
-
-    global smallest_BB_separation = 10000.0
-    global BB_vector_separation = [0.0, 0.0]
-
-    for i in 1:div(n,2)
-        indAA, distAA = knn(treeA1, latA2[i,:], 1)
-        if distAA[1] < smallest_AA_separation
-            global smallest_AA_separation = distAA[1]
-            global AA_vector_separation = transpose(latA1[indAA,1:3]) - latA2[i,:]
-            global AA_vector_separation = AA_vector_separation[1:3]
-        end
-
-        indBA, distBA = knn(treeB1, latA2[i,:], 1)
-        if distBA[1] < smallest_BA_separation
-            global smallest_BA_separation = distBA[1]
-            global BA_vector_separation = transpose(latB1[indBA,1:3]) - latA2[i,:]
-            global BA_vector_separation = BA_vector_separation[1:3]
-        end
-
-        indAB, distAB = knn(treeA1, latB2[i,:], 1)
-        if distAB[1] < smallest_AB_separation
-            global smallest_AB_separation = distAB[1]
-            global AB_vector_separation = transpose(latA1[indAB,1:3]) - latB2[i,:]
-            global AB_vector_separation = AB_vector_separation[1:3]
-        end
-
-        indBB, distBB = knn(treeB1, latB2[i,:], 1)
-        if distBB[1] < smallest_BB_separation
-            global smallest_BB_separation = distBB[1]
-            global BB_vector_separation = transpose(latB1[indBB,1:3]) - latB2[i,:]
-            global BB_vector_separation = BB_vector_separation[1:3]
-        end
+for i in 1:n
+    indAA, distAA = knn(treeA1, latA2[i,:], 1)
+    indBA, distBA = knn(treeB1, latA2[i,:], 1)
+    indAB, distAB = knn(treeA1, latB2[i,:], 1)
+    indBB, distBB = knn(treeB1, latB2[i,:], 1)
+    if distAA[1] < tol
+        push!(AA, latA2[i,:])
     end
+    if distBA[1] < tol
+        push!(BA, latA2[i,:])
+    end
+    if distAB[1] < tol
+        push!(AB, latB2[i,:])
+    end
+    if distBB[1] < tol
+        push!(BB, latB2[i,:])
+    end
+end
 
-    println("AA:     ", smallest_AA_separation)
-    println("AA_vec: ", AA_vector_separation)
-    println("BA:     ", smallest_BA_separation)
-    println("BA_vec: ", BA_vector_separation)
-    println("AB:     ", smallest_AB_separation)
-    println("AB_vec: ", AB_vector_separation)
-    println("BB:     ", smallest_BB_separation)
-    println("BB_vec: ", BB_vector_separation)
+latAA = transpose(hcat(AA...))
+latBA = transpose(hcat(BA...))
+latAB = transpose(hcat(AB...))
+latBB = transpose(hcat(BB...))
 
-    println("")
+
+max_radius = maximum(latA1) - 10.0
+try write_lattice(latAA, path*"/latticeAA.dat", max_radius)
+catch e
+    println("AA lattice is empty!")
+    # println(e)
+end
+
+try write_lattice(latBA, path*"/latticeBA.dat", max_radius)
+catch e
+    println("BA lattice is empty!")
+end
+
+try write_lattice(latAB, path*"/latticeAB.dat", max_radius)
+catch e
+    println("AB lattice is empty!")
+end
+
+try write_lattice(latBB, path*"/latticeBB.dat", max_radius)
+catch e
+    println("BB lattice is empty!")
 end
