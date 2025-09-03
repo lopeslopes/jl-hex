@@ -1,20 +1,19 @@
 include("hex_utils.jl")
 using .HexUtils
 
-for q in 50:200
-    println(q, " ", (180/pi)*magic_angle(1,q))
+function result(l, m, n)
+    aux = m^2 + 3*n^2 + 3*m*n + m + 2*n + 1/3 - 3*l^2
+    return aux
+end 
+
+for l in 1:5000
+    for m in 1:5000
+        for n in 1:5000
+            aux = result(l,m,n)
+            if abs(aux) < 0.5
+                println(l, ", ", m, ", ", n, ", ", aux)
+            end
+        end
+    end
 end
 
-# q1 = 82
-# q2 = 81
-# angle1 = magic_angle(1,q1)
-# angle2 = magic_angle(1,q2)
-# steps = 200
-# for i in 1:steps
-#     angle = angle1 + (angle2-angle1)*i*(1/steps)
-#     println(angle)
-# end
-#
-# m = 0
-# n = 250
-# println(asin((0.5+m)/(3*n+3)))
