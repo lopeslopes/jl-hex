@@ -11,15 +11,19 @@ n_datasets = length(dataset_dirs)
 
 smallest_AA_separation = 10000.0
 AA_vector_separation = [0.0, 0.0]
+AA_point_coord = [0.0, 0.0]
 
 smallest_BA_separation = 10000.0
 BA_vector_separation = [0.0, 0.0]
+BA_point_coord = [0.0, 0.0]
 
 smallest_AB_separation = 10000.0
 AB_vector_separation = [0.0, 0.0]
+AB_point_coord = [0.0, 0.0]
 
 smallest_BB_separation = 10000.0
 BB_vector_separation = [0.0, 0.0]
+BB_point_coord = [0.0, 0.0]
 
 # path = last(dataset_dirs)
 for path in dataset_dirs
@@ -50,15 +54,19 @@ for path in dataset_dirs
 
     global smallest_AA_separation = 10000.0
     global AA_vector_separation = [0.0, 0.0]
+    global AA_point_coord = [0.0, 0.0]
 
     global smallest_BA_separation = 10000.0
     global BA_vector_separation = [0.0, 0.0]
+    global BA_point_coord = [0.0, 0.0]
 
     global smallest_AB_separation = 10000.0
     global AB_vector_separation = [0.0, 0.0]
+    global AB_point_coord = [0.0, 0.0]
 
     global smallest_BB_separation = 10000.0
     global BB_vector_separation = [0.0, 0.0]
+    global BB_point_coord = [0.0, 0.0]
 
     for i in 1:div(n,2)
         indAA, distAA = knn(treeA1, latA2[i,:], 1)
@@ -66,6 +74,7 @@ for path in dataset_dirs
             global smallest_AA_separation = distAA[1]
             global AA_vector_separation = transpose(latA1[indAA,1:3]) - latA2[i,:]
             global AA_vector_separation = AA_vector_separation[1:3]
+            global AA_point_coord = latA2[i,:]
         end
 
         indBA, distBA = knn(treeB1, latA2[i,:], 1)
@@ -73,6 +82,7 @@ for path in dataset_dirs
             global smallest_BA_separation = distBA[1]
             global BA_vector_separation = transpose(latB1[indBA,1:3]) - latA2[i,:]
             global BA_vector_separation = BA_vector_separation[1:3]
+            global BA_point_coord = latA2[i,:]
         end
 
         indAB, distAB = knn(treeA1, latB2[i,:], 1)
@@ -80,6 +90,7 @@ for path in dataset_dirs
             global smallest_AB_separation = distAB[1]
             global AB_vector_separation = transpose(latA1[indAB,1:3]) - latB2[i,:]
             global AB_vector_separation = AB_vector_separation[1:3]
+            global AB_point_coord = latB2[i,:]
         end
 
         indBB, distBB = knn(treeB1, latB2[i,:], 1)
@@ -87,17 +98,22 @@ for path in dataset_dirs
             global smallest_BB_separation = distBB[1]
             global BB_vector_separation = transpose(latB1[indBB,1:3]) - latB2[i,:]
             global BB_vector_separation = BB_vector_separation[1:3]
+            global BB_point_coord = latB2[i,:]
         end
     end
 
-    println("AA:     ", smallest_AA_separation)
-    println("AA_vec: ", AA_vector_separation)
-    println("BA:     ", smallest_BA_separation)
-    println("BA_vec: ", BA_vector_separation)
-    println("AB:     ", smallest_AB_separation)
-    println("AB_vec: ", AB_vector_separation)
-    println("BB:     ", smallest_BB_separation)
-    println("BB_vec: ", BB_vector_separation)
+    println("AA:        ", smallest_AA_separation)
+    println("AA_vec:    ", AA_vector_separation)
+    println("AA_coord:  ", AA_point_coord)
+    println("BA:        ", smallest_BA_separation)
+    println("BA_vec:    ", BA_vector_separation)
+    println("BA_coord:  ", BA_point_coord)
+    println("AB:        ", smallest_AB_separation)
+    println("AB_vec:    ", AB_vector_separation)
+    println("AB_coord:  ", AB_point_coord)
+    println("BB:        ", smallest_BB_separation)
+    println("BB_vec:    ", BB_vector_separation)
+    println("BB_coord:  ", BB_point_coord)
 
     println("")
 end

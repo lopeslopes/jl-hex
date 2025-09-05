@@ -160,6 +160,12 @@ function read_properties(path)
     i = 0
     steps = 0
     max_radius = 0.0
+    a_top = 0.0
+    a_bot = 0.0
+    a1_top = [0.0, 0.0]
+    a2_top = [0.0, 0.0]
+    a1_bot = [0.0, 0.0]
+    a2_bot = [0.0, 0.0]
     open(path*"/properties.dat", "r") do file
         data = readlines(file)
         for line in data
@@ -184,19 +190,23 @@ function read_properties(path)
                     aux_atop = parse(Float64, aux[2])
                     a_top = aux_atop
                 elseif aux[1] == "a1_top"
-                    aux_a1top = parse(Float64, aux[2])
+                    aux = split(strip(aux[2]), ",")
+                    aux_a1top = [parse(Float64, lstrip(aux[1], '[')), parse(Float64, rstrip(aux[2], ']'))]
                     a1_top = aux_a1top
                 elseif aux[1] == "a2_top"
-                    aux_a2top = parse(Float64, aux[2])
+                    aux = split(strip(aux[2]), ",")
+                    aux_a2top = [parse(Float64, lstrip(aux[1], '[')), parse(Float64, rstrip(aux[2], ']'))]
                     a2_top = aux_a2top
                 elseif aux[1] == "a_bot"
                     aux_abot = parse(Float64, aux[2])
                     a_bot = aux_abot
                 elseif aux[1] == "a1_bot"
-                    aux_a1bot = parse(Float64, aux[2])
+                    aux = split(strip(aux[2]), ",")
+                    aux_a1bot = [parse(Float64, lstrip(aux[1], '[')), parse(Float64, rstrip(aux[2], ']'))]
                     a1_bot = aux_a1bot
                 elseif aux[1] == "a2_bot"
-                    aux_a2bot = parse(Float64, aux[2])
+                    aux = split(strip(aux[2]), ",")
+                    aux_a2bot = [parse(Float64, lstrip(aux[1], '[')), parse(Float64, rstrip(aux[2], ']'))]
                     a2_bot = aux_a2bot
                 end
             end
@@ -209,7 +219,7 @@ function read_properties(path)
     a = 2.46
     moire_period = a/(2*sin(angle/2))
 
-    return angle, moire_period, max_radius
+    return angle, moire_period, max_radius, a1_top, a2_top, a1_bot, a2_bot
 end
 
 function cell_area(a1, a2)

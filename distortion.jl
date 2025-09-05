@@ -73,82 +73,89 @@ latB1 = transpose(read_lattice_3d(path*"/latticeB1.dat"))
 ## DISTORTION
 ## Method 1: adding the separation vector directly to all points in the lattice
 ## just a whole lattice dislocation, primitive cell remains with the same area
-latA2 = transpose(read_lattice_3d(path*"/latticeA2.dat"))
-latB2 = transpose(read_lattice_3d(path*"/latticeB2.dat"))
-
-latA2_distorted = latA2 .+ AB_vec[min_index]
-latB2_distorted = latB2 .+ AB_vec[min_index]
+# latA2 = transpose(read_lattice_3d(path*"/latticeA2.dat"))
+# latB2 = transpose(read_lattice_3d(path*"/latticeB2.dat"))
+#
+# latA2_distorted = latA2 .+ AB_vec[min_index]
+# latB2_distorted = latB2 .+ AB_vec[min_index]
 
 ## Method 2: changing the a1 and a2 vectors based on the separation vector
 ## and then generating the whole lattice again using modified lat vectors
 ## TODO: calculate area of primitive cell
+angle, moire_period, max_radius, a1_top, a2_top, a1_bot, a2_bot = read_properties(path)
+cell_area_top = cell_area(a1_top, a2_top)
+cell_area_bot = cell_area(a1_bot, a2_bot)
+println(cell_area_top)
+println(cell_area_bot)
 
+new_a1 = []
+new_a2 = []
 
 
 
 ## finding AA, AB, BA, BB points for the angle and new A2, B2 lattices
-treeA1 = KDTree(latA1)
-treeB1 = KDTree(latB1)
-
-latA1 = transpose(latA1)
-latB1 = transpose(latB1)
-latA2 = transpose(latA2_distorted)
-latB2 = transpose(latB2_distorted)
-
-tol = 1.0e-3
-println("Tolerance:        ", tol)
-name = @sprintf("%6.4f", tol)
-
-AA = []
-BA = []
-AB = []
-BB = []
-
-n = minimum([size(latA1)[1], size(latB1)[1], size(latA2)[1], size(latB2)[1]])
-
-for i in 1:n
-    indAA, distAA = knn(treeA1, latA2[i,:], 1)
-    indBA, distBA = knn(treeB1, latA2[i,:], 1)
-    indAB, distAB = knn(treeA1, latB2[i,:], 1)
-    indBB, distBB = knn(treeB1, latB2[i,:], 1)
-    if distAA[1] < tol
-        push!(AA, latA2[i,:])
-    end
-    if distBA[1] < tol
-        push!(BA, latA2[i,:])
-    end
-    if distAB[1] < tol
-        push!(AB, latB2[i,:])
-    end
-    if distBB[1] < tol
-        push!(BB, latB2[i,:])
-    end
-end
-
-latAA = transpose(hcat(AA...))
-latBA = transpose(hcat(BA...))
-latAB = transpose(hcat(AB...))
-latBB = transpose(hcat(BB...))
-
-
-max_radius = maximum(latA1) - 10.0
-try write_lattice(latAA, path*"/latticeAA.dat", max_radius)
-catch e
-    println("AA lattice is empty!")
-    # println(e)
-end
-
-try write_lattice(latBA, path*"/latticeBA.dat", max_radius)
-catch e
-    println("BA lattice is empty!")
-end
-
-try write_lattice(latAB, path*"/latticeAB.dat", max_radius)
-catch e
-    println("AB lattice is empty!")
-end
-
-try write_lattice(latBB, path*"/latticeBB.dat", max_radius)
-catch e
-    println("BB lattice is empty!")
-end
+# treeA1 = KDTree(latA1)
+# treeB1 = KDTree(latB1)
+#
+# latA1 = transpose(latA1)
+# latB1 = transpose(latB1)
+# latA2 = transpose(latA2_distorted)
+# latB2 = transpose(latB2_distorted)
+#
+# tol = 1.0e-3
+# println("Tolerance:        ", tol)
+# name = @sprintf("%6.4f", tol)
+#
+# AA = []
+# BA = []
+# AB = []
+# BB = []
+#
+# n = minimum([size(latA1)[1], size(latB1)[1], size(latA2)[1], size(latB2)[1]])
+#
+# for i in 1:n
+#     indAA, distAA = knn(treeA1, latA2[i,:], 1)
+#     indBA, distBA = knn(treeB1, latA2[i,:], 1)
+#     indAB, distAB = knn(treeA1, latB2[i,:], 1)
+#     indBB, distBB = knn(treeB1, latB2[i,:], 1)
+#     if distAA[1] < tol
+#         push!(AA, latA2[i,:])
+#     end
+#     if distBA[1] < tol
+#         push!(BA, latA2[i,:])
+#     end
+#     if distAB[1] < tol
+#         push!(AB, latB2[i,:])
+#     end
+#     if distBB[1] < tol
+#         push!(BB, latB2[i,:])
+#     end
+# end
+#
+# latAA = transpose(hcat(AA...))
+# latBA = transpose(hcat(BA...))
+# latAB = transpose(hcat(AB...))
+# latBB = transpose(hcat(BB...))
+#
+#
+# max_radius = maximum(latA1) - 10.0
+# try write_lattice(latAA, path*"/latticeAA.dat", max_radius)
+# catch e
+#     println("AA lattice is empty!")
+#     # println(e)
+# end
+#
+# try write_lattice(latBA, path*"/latticeBA.dat", max_radius)
+# catch e
+#     println("BA lattice is empty!")
+# end
+#
+# try write_lattice(latAB, path*"/latticeAB.dat", max_radius)
+# catch e
+#     println("AB lattice is empty!")
+# end
+#
+# try write_lattice(latBB, path*"/latticeBB.dat", max_radius)
+# catch e
+#     println("BB lattice is empty!")
+# end
