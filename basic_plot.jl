@@ -15,7 +15,7 @@ a2 = [a*cos(lat_angle), a*sin(lat_angle)]
 latA1 = zeros(n ÷ 2, 2)
 latB1 = zeros(n ÷ 2, 2)
 
-HexUtils.create_honeycomb_lattice!(latA1, latB1, a, a1, a2, false)
+HexUtils.create_honeycomb_lattice_2!(latA1, latB1, a, a1, a2, false)
 HexUtils.rotate_lattice!(latA1, pi/6+pi, [0.0, 0.0])
 HexUtils.rotate_lattice!(latB1, pi/6+pi, [0.0, 0.0])
 

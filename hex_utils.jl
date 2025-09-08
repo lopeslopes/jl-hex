@@ -2,8 +2,58 @@ module HexUtils
 
 using LinearAlgebra
 
-export create_honeycomb_lattice!, write_lattice, rotate_lattice!, rotate_point!, read_lattice, read_lattice_3d, magic_angle, write_properties, read_properties, cell_area
+export create_honeycomb_lattice!, create_honeycomb_lattice_2!, write_lattice, rotate_lattice!, rotate_point!, read_lattice, read_lattice_3d, magic_angle, write_properties, read_properties, cell_area
 
+
+function create_honeycomb_lattice_2!(latticeA, latticeB, a, a1, a2, ab_stacking)
+    num_columns = 2*div(isqrt(size(latticeA,1)*2),3)
+
+    v1 = a1
+    v2 = a1
+    rotate_point!(v2, pi/3, [0.0, 0.0])
+    v3 = a2
+
+    d1 = (v2 + v3)*(1/3)
+
+    origin_a = [0.0, 0.0]
+    origin_b = origin_a + d1
+
+    row = 1
+    i = 1
+    while(i < size(latticeA,1))
+        for j=1:num_columns
+            if (i > size(latticeA,1))
+                break
+            end
+            latticeA[i,:] = origin_a + Float64(j-1)*v1
+            latticeB[i,:] = origin_b + Float64(j-1)*v1
+            i = i + 1
+        end
+        row  = row + 1
+        if (row % 2 == 1)
+            origin_a = origin_a + v2
+            origin_b = origin_b + v2
+        else
+            origin_a = origin_a + v3
+            origin_b = origin_b + v3
+        end
+    end
+
+    i0 = div((row ÷ 2) * num_columns + div(num_columns,2), 1)
+    lat_origin = latticeA[i0,:]
+
+    latticeA[:,1] = latticeA[:,1] .- lat_origin[1]
+    latticeA[:,2] = latticeA[:,2] .- lat_origin[2]
+    latticeB[:,1] = latticeB[:,1] .- lat_origin[1]
+    latticeB[:,2] = latticeB[:,2] .- lat_origin[2]
+    
+    if (ab_stacking)
+        latticeA[:,1] = latticeA[:,1] .- d1[1]
+        latticeA[:,2] = latticeA[:,2] .- d1[2]
+        latticeB[:,1] = latticeB[:,1] .- d1[1]
+        latticeB[:,2] = latticeB[:,2] .- d1[2]
+    end
+end
 
 function create_honeycomb_lattice!(latticeA, latticeB, a, a1, a2, ab_stacking)
     if ab_stacking

@@ -14,6 +14,10 @@ AA_vec = []
 BA_vec = []
 AB_vec = []
 BB_vec = []
+AA_coord = []
+BA_coord = []
+AB_coord = []
+BB_coord = []
 
 open("AAstack_separations", "r") do f
     for line in eachline(f)
@@ -47,6 +51,22 @@ open("AAstack_separations", "r") do f
             aux = split(line, ":")
             aux2 = split(strip(aux[2]), ",")
             push!(BB_vec, [parse(Float64, lstrip(aux2[1], '[')), parse(Float64, aux2[2]), parse(Float64, rstrip(aux2[3], ']'))])
+        elseif startswith(line, "AA_coord:")
+            aux = split(line, ":")
+            aux2 = split(strip(aux[2]), ",")
+            push!(AA_coord, [parse(Float64, lstrip(aux2[1], '[')), parse(Float64, aux2[2]), parse(Float64, rstrip(aux2[3], ']'))])
+        elseif startswith(line, "BA_coord:")
+            aux = split(line, ":")
+            aux2 = split(strip(aux[2]), ",")
+            push!(BA_coord, [parse(Float64, lstrip(aux2[1], '[')), parse(Float64, aux2[2]), parse(Float64, rstrip(aux2[3], ']'))])
+        elseif startswith(line, "AB_coord:")
+            aux = split(line, ":")
+            aux2 = split(strip(aux[2]), ",")
+            push!(AB_coord, [parse(Float64, lstrip(aux2[1], '[')), parse(Float64, aux2[2]), parse(Float64, rstrip(aux2[3], ']'))])
+        elseif startswith(line, "BB_coord:")
+            aux = split(line, ":")
+            aux2 = split(strip(aux[2]), ",")
+            push!(BB_coord, [parse(Float64, lstrip(aux2[1], '[')), parse(Float64, aux2[2]), parse(Float64, rstrip(aux2[3], ']'))])
         end
     end
 end
@@ -55,6 +75,8 @@ min_index = argmin(AB_sep)
 println("Angle:       ", angles[min_index])
 println("Separation:  ", AB_sep[min_index])
 println("Sep. Vector: ", AB_vec[min_index])
+println("Coordinates: ", AB_coord[min_index])
+
 
 
 ## reading files path for the selected angle, loading lattice1
@@ -87,6 +109,12 @@ cell_area_top = cell_area(a1_top, a2_top)
 cell_area_bot = cell_area(a1_bot, a2_bot)
 println(cell_area_top)
 println(cell_area_bot)
+
+distance = sqrt(AB_coord[min_index][1]^2 + AB_coord[min_index][2]^2)
+len_a = sqrt(a1_bot[1]^2 + a1_bot[2]^2)
+println("Distance: ", distance)
+ratio_a = distance/len_a
+println("ratio: ", ratio_a)
 
 new_a1 = []
 new_a2 = []
