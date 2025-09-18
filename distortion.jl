@@ -75,7 +75,6 @@ min_index = argmin(AB_sep)
 println("Angle:       ", angles[min_index])
 println("Separation:  ", AB_sep[min_index])
 println("Sep. Vector: ", AB_vec[min_index])
-println("Coordinates: ", AB_coord[min_index])
 
 
 
@@ -93,31 +92,43 @@ latB1 = transpose(read_lattice_3d(path*"/latticeB1.dat"))
 
 
 ## DISTORTION
-## Method 1: adding the separation vector directly to all points in the lattice
-## just a whole lattice dislocation, primitive cell remains with the same area
-# latA2 = transpose(read_lattice_3d(path*"/latticeA2.dat"))
-# latB2 = transpose(read_lattice_3d(path*"/latticeB2.dat"))
-#
-# latA2_distorted = latA2 .+ AB_vec[min_index]
-# latB2_distorted = latB2 .+ AB_vec[min_index]
-
 ## Method 2: changing the a1 and a2 vectors based on the separation vector
 ## and then generating the whole lattice again using modified lat vectors
 ## TODO: calculate area of primitive cell
 angle, moire_period, max_radius, a1_top, a2_top, a1_bot, a2_bot = read_properties(path)
-cell_area_top = cell_area(a1_top, a2_top)
-cell_area_bot = cell_area(a1_bot, a2_bot)
-println(cell_area_top)
-println(cell_area_bot)
+
+rotate_point!(a1_bot, angle, [0.0, 0.0])
+rotate_point!(a2_bot, angle, [0.0, 0.0])
+
+# cell_area_top = cell_area(a1_top, a2_top)
+# cell_area_bot = cell_area(a1_bot, a2_bot)
+# println(cell_area_top)
+# println(cell_area_bot)
 
 distance = sqrt(AB_coord[min_index][1]^2 + AB_coord[min_index][2]^2)
 len_a = sqrt(a1_bot[1]^2 + a1_bot[2]^2)
-println("Distance: ", distance)
-ratio_a = distance/len_a
-println("ratio: ", ratio_a)
 
-new_a1 = []
-new_a2 = []
+cob_matrix = Matrix{Float64}(undef, 2, 2)
+cob_matrix[1,1] = a1_top[1]
+cob_matrix[1,2] = a2_top[1]
+cob_matrix[2,1] = a1_top[2]
+cob_matrix[2,2] = a2_top[2]
+inv_cob = inv(cob_matrix)
+
+coord_lat_basis = inv_cob * AB_coord[min_index][1:2]
+# n_a1 = trunc(coord_lat_basis[1])
+# n_a2 = trunc(coord_lat_basis[2])
+n_a1 = coord_lat_basis[1]
+n_a2 = coord_lat_basis[2]
+
+
+println("Cardinal Coords: ", AB_coord[min_index])
+println("Lat vecs Coords: ", [n_a1, n_a2])
+
+
+println(a1_top)
+println(a1_bot)
+
 
 
 
