@@ -74,8 +74,6 @@ end
 min_index = argmin(AB_sep)
 println("Angle:       ", angles[min_index])
 println("Separation:  ", AB_sep[min_index])
-println("Sep. Vector: ", AB_vec[min_index])
-
 
 
 ## reading files path for the selected angle, loading lattice1
@@ -116,18 +114,29 @@ cob_matrix[2,2] = a2_top[2]
 inv_cob = inv(cob_matrix)
 
 coord_lat_basis = inv_cob * AB_coord[min_index][1:2]
-# n_a1 = trunc(coord_lat_basis[1])
-# n_a2 = trunc(coord_lat_basis[2])
-n_a1 = coord_lat_basis[1]
-n_a2 = coord_lat_basis[2]
+sep_vec_decomp = inv_cob * AB_vec[min_index][1:2]
+m_coord = trunc(coord_lat_basis[1])
+n_coord = trunc(coord_lat_basis[2])
+
+println("Separation vec     : ", AB_vec[min_index][1:2])
+println("Lat vecs separation: ", sep_vec_decomp)
+
+s1 = sep_vec_decomp[1]/m_coord
+s2 = sep_vec_decomp[2]/n_coord
+sf = [s1, s2]
+
+alpha1 = [1+s1, 0.0]
+alpha2 = [0.0, 1+s2]
+
+alpha1_cart = cob_matrix * alpha1
+alpha2_cart = cob_matrix * alpha2
 
 
-println("Cardinal Coords: ", AB_coord[min_index])
-println("Lat vecs Coords: ", [n_a1, n_a2])
+println("a1 cartesian: ", a1_top)
+println("a2 cartesian: ", a2_top)
 
-
-println(a1_top)
-println(a1_bot)
+println("Alpha1 cartesian: ", alpha1_cart)
+println("Alpha2 cartesian: ", alpha2_cart)
 
 
 

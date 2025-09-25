@@ -91,18 +91,7 @@
 \[
 \vec{a}_{1}=a\begin{pmatrix}\frac{\sqrt{3}}{2}\\
 \frac{1}{2}
-\end{pmatrix}
-\]
-
-\end_inset
-
-
-\end_layout
-
-\begin_layout Standard
-\begin_inset Formula 
-\[
-\vec{a}_{2}=a\begin{pmatrix}\frac{\sqrt{3}}{2}\\
+\end{pmatrix},\,\,\,\,\,\,\,\,\,\,\vec{a}_{2}=a\begin{pmatrix}\frac{\sqrt{3}}{2}\\
 -\frac{1}{2}
 \end{pmatrix}
 \]
@@ -119,6 +108,29 @@
 0
 \end{pmatrix}
 \]
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+\begin_inset Float figure
+placement H
+alignment document
+wide false
+sideways false
+status open
+
+\begin_layout Plain Layout
+\begin_inset Graphics
+	filename lat_vecs.png
+	scale 50
+
+\end_inset
+
+
+\end_layout
 
 \end_inset
 
@@ -281,6 +293,289 @@ l=\sqrt{\frac{m^{2}}{3}+n^{2}+mn+\frac{m}{3}+\frac{2n}{3}+\frac{1}{9}}
 \begin_inset Formula 
 \[
 m^{2}+3n^{2}+3mn+m+2n+\frac{1}{3}-3l^{2}=0
+\]
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+Proposta:
+ distorcer os vetores da rede de forma a induzir uma superposição do tipo AB.
+ Para isso encontramos,
+ para vários ângulos de torção,
+ a menor distância entre pontos do tipo A de uma rede com os pontos B da outra rede,
+ e os respectivos vetores de separação no plano 
+\begin_inset Formula $xy$
+\end_inset
+
+,
+ sem considerar a separação no eixo 
+\begin_inset Formula $z$
+\end_inset
+
+.
+ Considerando os pontos encontrados para a menor separação temos:
+\end_layout
+
+\begin_layout Standard
+\begin_inset Formula 
+\[
+\vec{r}_{1}=m\vec{a}_{1}+n\vec{a}_{2}
+\]
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+Adicionando o vetor separação 
+\begin_inset Formula $\vec{s}_{t}$
+\end_inset
+
+ encontrado de forma a induzir a superposição temos:
+\end_layout
+
+\begin_layout Standard
+\begin_inset Formula 
+\[
+\vec{r}_{2}=\vec{r}_{1}+\vec{s}_{t}=m\vec{a}_{1}+n\vec{a}_{2}+\vec{s}_{t}
+\]
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+Mas queremos adicionar a distorção diretamente aos vetores da rede,
+ então é preciso decompor o vetor separação.
+ Supondo:
+\end_layout
+
+\begin_layout Standard
+\begin_inset Formula 
+\[
+\vec{s}_{t}=m\vec{s}_{1}+n\vec{s}_{2}
+\]
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+\begin_inset Formula 
+\[
+\vec{r}_{2}=m\vec{a}_{1}+n\vec{a}_{2}+m\vec{s}_{1}+n\vec{s}_{2}
+\]
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+\begin_inset Formula 
+\[
+\vec{r}_{2}=m\left(\vec{a}_{1}+\vec{s}_{1}\right)+n\left(\vec{a}_{2}+\vec{s}_{2}\right)
+\]
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+Tornando os novos vetores de rede:
+\end_layout
+
+\begin_layout Standard
+\begin_inset Formula 
+\[
+\vec{\alpha}_{1}=\vec{a}_{1}+\vec{s}_{1}
+\]
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+\begin_inset Formula 
+\[
+\vec{\alpha}_{2}=\vec{a}_{2}+\vec{s}_{2}
+\]
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+Usando o sistema de coordenadas cartesiano temos:
+\end_layout
+
+\begin_layout Standard
+
+\family roman
+\series medium
+\shape up
+\size normal
+\emph off
+\nospellcheck off
+\bar no
+\strikeout off
+\xout off
+\uuline off
+\uwave off
+\noun off
+\color none
+\begin_inset Formula 
+\[
+\vec{a}_{1}=\begin{pmatrix}\frac{\sqrt{3}}{2}\\
+\frac{1}{2}
+\end{pmatrix},\,\,\,\,\,\,\,\,\,\,\vec{a}_{2}=\begin{pmatrix}\frac{\sqrt{3}}{2}\\
+-\frac{1}{2}
+\end{pmatrix}
+\]
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+\begin_inset Formula 
+\[
+\vec{s}_{t}=\begin{pmatrix}x\\
+y
+\end{pmatrix}
+\]
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+Transformando para o sistema de coordenadas da rede usando a matriz de troca de base 
+\begin_inset Formula $M$
+\end_inset
+
+,
+ temos:
+\end_layout
+
+\begin_layout Standard
+\begin_inset Formula 
+\[
+M=\begin{pmatrix}\frac{\sqrt{3}}{2} & \frac{\sqrt{3}}{2}\\
+\frac{1}{2} & -\frac{1}{2}
+\end{pmatrix},\,\,\,\,\,\,\,\,\,\,\,\,M^{-1}=\begin{pmatrix}\frac{\sqrt{3}}{3} & 1\\
+\frac{\sqrt{3}}{3} & -1
+\end{pmatrix}
+\]
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+\begin_inset Formula 
+\[
+\vec{a}_{1}=\begin{pmatrix}1\\
+0
+\end{pmatrix},\,\,\,\,\,\,\,\,\,\,\vec{a}_{2}=\begin{pmatrix}0\\
+1
+\end{pmatrix}
+\]
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+\begin_inset Formula 
+\[
+\vec{s}_{t}=\begin{pmatrix}\frac{\sqrt{3}}{3} & 1\\
+\frac{\sqrt{3}}{3} & -1
+\end{pmatrix}\begin{pmatrix}x\\
+y
+\end{pmatrix}=\begin{pmatrix}\frac{\sqrt{3}}{3}x+y\\
+\frac{\sqrt{3}}{3}x-y
+\end{pmatrix}
+\]
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+Dividindo as componentes do vetor 
+\begin_inset Formula $\vec{s}_{t}$
+\end_inset
+
+ nas coordenadas da rede por 
+\begin_inset Formula $m$
+\end_inset
+
+ e 
+\begin_inset Formula $n$
+\end_inset
+
+ teremos a distorção que pode ser adicionada diretamente aos vetores de rede:
+\end_layout
+
+\begin_layout Standard
+\begin_inset Formula 
+\[
+\vec{s}_{f}=\begin{pmatrix}\frac{\frac{\sqrt{3}}{3}x+y}{m}\\
+\frac{\frac{\sqrt{3}}{3}x-y}{n}
+\end{pmatrix}=\vec{s}_{1}+\vec{s}_{2}=\begin{pmatrix}\frac{\frac{\sqrt{3}}{3}x+y}{m}\\
+0
+\end{pmatrix}+\begin{pmatrix}0\\
+\frac{\frac{\sqrt{3}}{3}x-y}{n}
+\end{pmatrix}
+\]
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+\begin_inset Formula 
+\[
+\vec{\alpha}_{1}=\vec{a}_{1}+\vec{s}_{1}=\begin{pmatrix}1\\
+0
+\end{pmatrix}+\begin{pmatrix}\frac{\frac{\sqrt{3}}{3}x+y}{m}\\
+0
+\end{pmatrix}=\begin{pmatrix}1+\frac{\frac{\sqrt{3}}{3}x+y}{m}\\
+0
+\end{pmatrix}
+\]
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+\begin_inset Formula 
+\[
+\vec{\alpha}_{2}=\vec{a}_{2}+\vec{s}_{2}=\begin{pmatrix}0\\
+1
+\end{pmatrix}+\begin{pmatrix}0\\
+\frac{\frac{\sqrt{3}}{3}x-y}{n}
+\end{pmatrix}=\begin{pmatrix}0\\
+1+\frac{\frac{\sqrt{3}}{3}x-y}{n}
+\end{pmatrix}
 \]
 
 \end_inset
