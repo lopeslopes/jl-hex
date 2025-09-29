@@ -92,16 +92,11 @@ latB1 = transpose(read_lattice_3d(path*"/latticeB1.dat"))
 ## DISTORTION
 ## Method 2: changing the a1 and a2 vectors based on the separation vector
 ## and then generating the whole lattice again using modified lat vectors
-## TODO: calculate area of primitive cell
 angle, moire_period, max_radius, a1_top, a2_top, a1_bot, a2_bot = read_properties(path)
 
 rotate_point!(a1_bot, angle, [0.0, 0.0])
 rotate_point!(a2_bot, angle, [0.0, 0.0])
 
-# cell_area_top = cell_area(a1_top, a2_top)
-# cell_area_bot = cell_area(a1_bot, a2_bot)
-# println(cell_area_top)
-# println(cell_area_bot)
 
 distance = sqrt(AB_coord[min_index][1]^2 + AB_coord[min_index][2]^2)
 len_a = sqrt(a1_bot[1]^2 + a1_bot[2]^2)
@@ -138,17 +133,45 @@ println("a2 cartesian: ", a2_top)
 println("Alpha1 cartesian: ", alpha1_cart)
 println("Alpha2 cartesian: ", alpha2_cart)
 
+len_alpha1 = sqrt(alpha1_cart[1]^2 + alpha1_cart[2]^2)
+len_alpha2 = sqrt(alpha2_cart[1]^2 + alpha2_cart[2]^2)
+println("alpha 1 length: ", len_alpha1)
+println("alpha 2 length: ", len_alpha2)
 
+## MAKING NEW LATTICES BASED ON THE NEW ALPHA LATTICE VECTORS
+n = 2000000
+latA2 = transpose(read_lattice_3d(path*"/latticeA2.dat"))
+latB2 = transpose(read_lattice_3d(path*"/latticeB2.dat")) 
+latA1_distorted = zeros(n ÷ 2, 2)
+latB1_distorted = zeros(n ÷ 2, 2)
 
+HexUtils.create_honeycomb_lattice!(latA1_distorted, latB1_distorted, alpha1_cart, alpha2_cart, false)
+
+cell_area_bot = cell_area(a1_bot, a2_bot)
+cell_area_top = cell_area(alpha1_cart, alpha2_cart)
+println("Cell area non-distorted: ", cell_area_bot)
+println("Cell area distorted:     ", cell_area_top)
+
+# WRITING POINTS OUT OF OVERLAP
+try write_lattice(latA1_distorted, path*"/latticeA1_dist.dat", max_radius)
+catch e
+    println(e)
+end
+
+try write_lattice(latB1_distorted, path*"/latticeB1_dist.dat", max_radius)
+catch e
+    println(e)
+end
 
 ## finding AA, AB, BA, BB points for the angle and new A2, B2 lattices
-# treeA1 = KDTree(latA1)
-# treeB1 = KDTree(latB1)
+# latA1_distorted = transpose(latA1_distorted)
+# latB1_distorted = transpose(latB1_distorted)
 #
-# latA1 = transpose(latA1)
-# latB1 = transpose(latB1)
-# latA2 = transpose(latA2_distorted)
-# latB2 = transpose(latB2_distorted)
+# treeA1 = KDTree(latA1_distorted)
+# treeB1 = KDTree(latB1_distorted)
+#
+# # latA1_distorted = transpose(latA1_distorted)
+# # latB1_distorted = transpose(latB1_distorted)
 #
 # tol = 1.0e-3
 # println("Tolerance:        ", tol)
@@ -159,7 +182,7 @@ println("Alpha2 cartesian: ", alpha2_cart)
 # AB = []
 # BB = []
 #
-# n = minimum([size(latA1)[1], size(latB1)[1], size(latA2)[1], size(latB2)[1]])
+# n = minimum([size(latA1_distorted)[1], size(latB1_distorted)[1], size(latA2)[1], size(latB2)[1]])
 #
 # for i in 1:n
 #     indAA, distAA = knn(treeA1, latA2[i,:], 1)
@@ -186,24 +209,24 @@ println("Alpha2 cartesian: ", alpha2_cart)
 # latBB = transpose(hcat(BB...))
 #
 #
-# max_radius = maximum(latA1) - 10.0
-# try write_lattice(latAA, path*"/latticeAA.dat", max_radius)
+# max_radius = maximum(latA1_distorted) - 10.0
+#
+# try write_lattice(latAA, path*"/latticeAA_dist.dat", max_radius)
 # catch e
 #     println("AA lattice is empty!")
-#     # println(e)
 # end
 #
-# try write_lattice(latBA, path*"/latticeBA.dat", max_radius)
+# try write_lattice(latBA, path*"/latticeBA_dist.dat", max_radius)
 # catch e
 #     println("BA lattice is empty!")
 # end
 #
-# try write_lattice(latAB, path*"/latticeAB.dat", max_radius)
+# try write_lattice(latAB, path*"/latticeAB_dist.dat", max_radius)
 # catch e
 #     println("AB lattice is empty!")
 # end
 #
-# try write_lattice(latBB, path*"/latticeBB.dat", max_radius)
+# try write_lattice(latBB, path*"/latticeBB_dist.dat", max_radius)
 # catch e
 #     println("BB lattice is empty!")
 # end

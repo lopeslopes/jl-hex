@@ -107,13 +107,13 @@ print("D = ", moire_period)
 # load data from the lattices
 latA1 = load_lattice(dataset_dirs[k] / "latticeA1.dat")
 latB1 = load_lattice(dataset_dirs[k] / "latticeB1.dat")
-latA2 = load_lattice(dataset_dirs[k] / "latticeA2.dat")
-latB2 = load_lattice(dataset_dirs[k] / "latticeB2.dat")
+latA2 = load_lattice(dataset_dirs[k] / "latticeA2_dist.dat")
+latB2 = load_lattice(dataset_dirs[k] / "latticeB2_dist.dat")
 
-latAA = load_lattice(dataset_dirs[k] / "latticeAA.dat")
-latBA = load_lattice(dataset_dirs[k] / "latticeBA.dat")
-latAB = load_lattice(dataset_dirs[k] / "latticeAB.dat")
-latBB = load_lattice(dataset_dirs[k] / "latticeBB.dat")
+latAA = load_lattice(dataset_dirs[k] / "latticeAA_dist.dat")
+latBA = load_lattice(dataset_dirs[k] / "latticeBA_dist.dat")
+latAB = load_lattice(dataset_dirs[k] / "latticeAB_dist.dat")
+latBB = load_lattice(dataset_dirs[k] / "latticeBB_dist.dat")
 
 # moire period circle visualization
 r = moire_period

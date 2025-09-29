@@ -20,7 +20,7 @@ println("Creating lattices...")
 latA1 = zeros(n ÷ 2, 2)
 latB1 = zeros(n ÷ 2, 2)
 
-HexUtils.create_honeycomb_lattice!(latA1, latB1, a_top, a1_top, a2_top, false)
+HexUtils.create_honeycomb_lattice!(latA1, latB1, a1_top, a2_top, false)
 
 max_radius = maximum(latA1) - 10.0
 
@@ -45,7 +45,7 @@ for q in [61.0, 60.0, 59.0, 58.0]
         a1_bot = [a_bot, 0.0]
         a2_bot = [-a_bot*cos(pi/3.0), a_bot*sin(pi/3.0)]
 
-        HexUtils.create_honeycomb_lattice!(latA2, latB2, a_bot, a1_bot, a2_bot, AB_stacking)
+        HexUtils.create_honeycomb_lattice!(latA2, latB2, a1_bot, a2_bot, AB_stacking)
 
         angle = angle_i + j*(angle_f - angle_i)/steps
         ang_name = @sprintf("%9.7f", angle)
