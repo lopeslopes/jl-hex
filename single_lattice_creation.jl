@@ -20,13 +20,10 @@ println("Creating lattices...")
 latA1 = zeros(n ÷ 2, 2)
 latB1 = zeros(n ÷ 2, 2)
 
-HexUtils.create_honeycomb_lattice!(latA1, latB1, a_top, a1_top, a2_top, false)
+HexUtils.create_honeycomb_lattice!(latA1, latB1, a1_top, a2_top, false)
 
 max_radius = maximum(latA1) - 10.0
-
-treeA1 = KDTree(transpose(latA1))
-treeB1 = KDTree(transpose(latB1))
-
+println(max_radius)
 
 ## new section
 angles = Float64[]
@@ -61,7 +58,7 @@ a_bot = 2.46
 a1_bot = [a_bot, 0.0]
 a2_bot = [-a_bot*cos(pi/3.0), a_bot*sin(pi/3.0)]
 
-HexUtils.create_honeycomb_lattice!(latA2, latB2, a_bot, a1_bot, a2_bot, AB_stacking)
+HexUtils.create_honeycomb_lattice!(latA2, latB2, a1_bot, a2_bot, AB_stacking)
 
 angle = angles[min_index]
 ang_name = @sprintf("%9.7f", angle)
@@ -77,9 +74,15 @@ println("Angle in degrees: ", (angle * 180) / pi)
 rotate_lattice!(latA2, angle, rot_axis)
 rotate_lattice!(latB2, angle, rot_axis)
 
+path_small_lat = "data/"*ang_name*"_200k"
+p, q, i, steps, moire_period, max_radius_old = read_properties_raw(path_small_lat)
+
 # tol = 5.0e-3
 # println("Tolerance:        ", tol)
 # name = @sprintf("%6.4f", tol)
+#
+# treeA1 = KDTree(transpose(latA1))
+# treeB1 = KDTree(transpose(latB1))
 #
 # AA = []
 # BA = []
@@ -155,4 +158,4 @@ catch e
     println("B2 lat is empty!")
 end
 
-write_properties(p, q, j, steps, max_radius, a_top, a1_top, a2_top, a_bot, a1_bot, a2_bot, "data/"*ang_name*"_200k/properties.dat")
+write_properties(p, q, i, steps, max_radius, a_top, a1_top, a2_top, a_bot, a1_bot, a2_bot, "data/"*ang_name*"_2M/properties.dat")

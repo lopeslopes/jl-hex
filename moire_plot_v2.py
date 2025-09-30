@@ -89,10 +89,11 @@ print("Separation: ", AB[min_index])
 base_data_path = Path("data")
 dataset_dirs = sorted([d for d in base_data_path.iterdir() if d.is_dir()])
 
-print(dataset_dirs[min_index])
+print(dataset_dirs[min_index+1])
 
 
-k = min_index
+
+k = min_index+1
 # obtain lattice properties
 a = 2.46
 p, q, j, steps = load_properties(dataset_dirs[k])
@@ -105,10 +106,10 @@ moire_period = a/(2*np.sin(angle/2))
 print("D = ", moire_period)
 
 # load data from the lattices
-latA1 = load_lattice(dataset_dirs[k] / "latticeA1.dat")
-latB1 = load_lattice(dataset_dirs[k] / "latticeB1.dat")
-latA2 = load_lattice(dataset_dirs[k] / "latticeA2_dist.dat")
-latB2 = load_lattice(dataset_dirs[k] / "latticeB2_dist.dat")
+latA1 = load_lattice(dataset_dirs[k] / "latticeA1_dist.dat")
+latB1 = load_lattice(dataset_dirs[k] / "latticeB1_dist.dat")
+latA2 = load_lattice(dataset_dirs[k] / "latticeA2.dat")
+latB2 = load_lattice(dataset_dirs[k] / "latticeB2.dat")
 
 latAA = load_lattice(dataset_dirs[k] / "latticeAA_dist.dat")
 latBA = load_lattice(dataset_dirs[k] / "latticeBA_dist.dat")
@@ -138,18 +139,19 @@ angle_name = folder_name[first_underline+1:second_underline]
 all_pts = np.concatenate((latA1, latB1, latA2, latB2))
 points_total = hv.Points(all_pts)
 
-min_x = -350
-max_x = 350
-min_y = -350
-max_y = 350
+min_x = -850
+max_x = 850
+min_y = -850
+max_y = 850
 f_width = max_x-min_x
-moire = rasterize(points_total, width=f_width+100, height=f_width+100)
+f_height = max_y-min_y
+moire = rasterize(points_total, width=f_width+100, height=f_height+100)
 moire = moire.opts(
     cmap="blues",
     # colorbar=True,
     yaxis=None,
     frame_width=f_width,
-    frame_height=f_width,
+    frame_height=f_height,
     xlim=(min_x, max_x),
     ylim=(min_y, max_y),
     title=angle_name,
@@ -178,4 +180,4 @@ overlap = overlap.opts(show_legend=True)
 
 full_image = moire * overlap
 hv.save(full_image, angle_name+".png", fmt="png", backend="bokeh")
-trim(angle_name+".png", angle_name+".png")
+# trim(angle_name+".png", angle_name+".png")
