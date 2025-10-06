@@ -74,14 +74,18 @@ end
 min_index = argmin(AB_sep)
 println("Angle:       ", angles[min_index])
 
-## reading files path for the selected angle, loading lattice1
+
+
+## selecting path of minimum separation --
 # base_data_path = "data"
 # entries = readdir(base_data_path; join=true)
 # dataset_dirs = sort(filter(isdir, entries))
 # n_datasets = length(dataset_dirs)
 #
 # path = dataset_dirs[min_index]
+## ---------------------------------------
 
+## selecting path mannualy ---------------
 AB_stacking = false
 angle = angles[min_index]
 ang_name = @sprintf("%9.7f", angle)
@@ -91,14 +95,15 @@ else
     ang_name = "AA_"*ang_name
 end
 path = "data/"*ang_name*"_2M"
+## ---------------------------------------
+
 
 angle_name = path[findfirst("_",path)[1]+1:findlast("_", path)[1]-1]
-
-## DISTORTION
-## Method 2: changing the a1 and a2 vectors based on the separation vector
-## and then generating the whole lattice again using modified lat vectors
 angle, moire_period, max_radius, a1_top, a2_top, a1_bot, a2_bot = read_properties(path)
 
+## DISTORTION 1 --------------------------
+## changing the a1 and a2 vectors based on the separation vector
+## and then generating the whole lattice again using modified lat vectors
 cob_matrix = Matrix{Float64}(undef, 2, 2)
 cob_matrix[1,1] = a1_top[1]
 cob_matrix[1,2] = a2_top[1]
@@ -115,36 +120,92 @@ s1 = sep_vec_decomp[1]/m_coord
 s2 = sep_vec_decomp[2]/n_coord
 sf = [s1, s2]
 
-alpha1 = [1+s1, 0.0]
-alpha2 = [0.0, 1+s2]
+# alpha_t1 = [1+s1, 0.0]
+# alpha_t2 = [0.0, 1+s2]
 
-alpha1_cart = cob_matrix * alpha1
-alpha2_cart = cob_matrix * alpha2
+alpha_t1 = [1+s1/2, 0.0]
+alpha_t2 = [0.0, 1+s2/2]
+
+alpha_t1_cart = cob_matrix * alpha_t1
+alpha_t2_cart = cob_matrix * alpha_t2
+
+# alpha_b1 = [1, 0.0]
+# alpha_b2 = [0.0, 1]
+
+alpha_b1 = [1-s1/2, 0.0]
+alpha_b2 = [0.0, 1-s2/2]
+
+alpha_b1_cart = cob_matrix * alpha_b1
+alpha_b2_cart = cob_matrix * alpha_b2
 
 println("a1 cartesian: ", a1_top)
 println("a2 cartesian: ", a2_top)
 
-println("Alpha1 cartesian: ", alpha1_cart)
-println("Alpha2 cartesian: ", alpha2_cart)
+println("Alpha t1 cartesian: ", alpha_t1_cart)
+println("Alpha t2 cartesian: ", alpha_t2_cart)
+println("Alpha b1 cartesian: ", alpha_b1_cart)
+println("Alpha b2 cartesian: ", alpha_b2_cart)
 
-len_alpha1 = sqrt(alpha1_cart[1]^2 + alpha1_cart[2]^2)
-len_alpha2 = sqrt(alpha2_cart[1]^2 + alpha2_cart[2]^2)
-println("Alpha1 length: ", len_alpha1)
-println("Alpha2 length: ", len_alpha2)
+len_alpha_t1 = sqrt(alpha_t1_cart[1]^2 + alpha_t1_cart[2]^2)
+len_alpha_t2 = sqrt(alpha_t2_cart[1]^2 + alpha_t2_cart[2]^2)
+println("Alpha t1 length: ", len_alpha_t1)
+println("Alpha t2 length: ", len_alpha_t2)
+len_alpha_b1 = sqrt(alpha_b1_cart[1]^2 + alpha_b1_cart[2]^2)
+len_alpha_b2 = sqrt(alpha_b2_cart[1]^2 + alpha_b2_cart[2]^2)
+println("Alpha b1 length: ", len_alpha_b1)
+println("Alpha b2 length: ", len_alpha_b2)
+## ---------------------------------------
+
+## DISTORTION 2 --------------------------
+## not distorting for test purposes
+# alpha_t1_cart = a1_top
+# alpha_t2_cart = a2_top
+#
+# alpha_b1_cart = a1_bot
+# alpha_b2_cart = a2_bot
+## ---------------------------------------
+
 
 ## MAKING NEW LATTICES BASED ON THE NEW ALPHA LATTICE VECTORS
 n = 2000000
-latA2 = read_lattice(path*"/latticeA2.dat")
-latB2 = read_lattice(path*"/latticeB2.dat")
+
 latA1_distorted = zeros(n ÷ 2, 2)
 latB1_distorted = zeros(n ÷ 2, 2)
+latA2_distorted = zeros(n ÷ 2, 2)
+latB2_distorted = zeros(n ÷ 2, 2)
 
-HexUtils.create_honeycomb_lattice!(latA1_distorted, latB1_distorted, alpha1_cart, alpha2_cart, false)
+## ROTATING ONE OF THE LATTICES ----------
+## method 1: rotating the basis vectors
+## then generating the lattice
+rotate_point!(alpha_b1_cart, angle, [0.0, 0.0])
+rotate_point!(alpha_b2_cart, angle, [0.0, 0.0])
 
-# cell_area_bot = cell_area(a1_bot, a2_bot)
-# cell_area_top = cell_area(alpha1_cart, alpha2_cart)
-# println("Cell area non-distorted: ", cell_area_bot)
-# println("Cell area distorted:     ", cell_area_top)
+HexUtils.create_honeycomb_lattice!(latA1_distorted, latB1_distorted, alpha_t1_cart, alpha_t2_cart, false)
+HexUtils.create_honeycomb_lattice!(latA2_distorted, latB2_distorted, alpha_b1_cart, alpha_b2_cart, false)
+## ---------------------------------------
+
+## DISTORTION METHOD 3 -------------------
+## just to test if the program finds the
+## minimum separation point
+# latA2_distorted = transpose(transpose(latA2_distorted) .+ AB_vec[min_index][1:2])
+# latB2_distorted = transpose(transpose(latB2_distorted) .+ AB_vec[min_index][1:2])
+## ---------------------------------------
+
+## ROTATING ONE OF THE LATTICES ----------
+## method 2: generating the lattice
+## then rotating the whole thing
+# HexUtils.create_honeycomb_lattice!(latA1_distorted, latB1_distorted, alpha_t1_cart, alpha_t2_cart, false)
+# HexUtils.create_honeycomb_lattice!(latA2_distorted, latB2_distorted, alpha_b1_cart, alpha_b2_cart, false)
+#
+# rotate_lattice!(latA2_distorted, angle, [0.0, 0.0])
+# rotate_lattice!(latB2_distorted, angle, [0.0, 0.0])
+## ---------------------------------------
+
+
+cell_area_bot = cell_area(alpha_b1_cart, alpha_b2_cart)
+cell_area_top = cell_area(alpha_t1_cart, alpha_t2_cart)
+println("Cell area top lattice: ", cell_area_top)
+println("Cell area bot lattice: ", cell_area_bot)
 
 # WRITING POINTS OUT OF OVERLAP
 try write_lattice(latA1_distorted, path*"/latticeA1_dist.dat", max_radius)
@@ -157,23 +218,19 @@ catch e
     println(e)
 end
 
-println(max_radius)
+try write_lattice(latA2_distorted, path*"/latticeA2_dist.dat", max_radius)
+catch e
+    println(e)
+end
 
-## TEST SECTION: READING LATTICE FROM FILE INSTEAD OF USING THE COMPUTED VALUES
-## JUST TO BE EQUAL TO THE ACQUISITION OF LAT_A2 AND LAT_B2
-latA1_distorted = 0
-latB1_distorted = 0
-# gc()
-latA1_distorted = read_lattice(path*"/latticeA1_dist.dat", max_radius)
-latB1_distorted = read_lattice(path*"/latticeB1_dist.dat", max_radius)
-
+try write_lattice(latB2_distorted, path*"/latticeB2_dist.dat", max_radius)
+catch e
+    println(e)
+end
 
 # finding AA, AB, BA, BB points for the angle and new A2, B2 lattices
 treeA1 = KDTree(transpose(latA1_distorted))
 treeB1 = KDTree(transpose(latB1_distorted))
-
-# latA1_distorted = transpose(latA1_distorted)
-# latB1_distorted = transpose(latB1_distorted)
 
 tol = 1.0e-3
 println("Tolerance:        ", tol)
@@ -184,26 +241,24 @@ BA = []
 AB = []
 BB = []
 
-n = minimum([size(latA1_distorted)[1], size(latB1_distorted)[1], size(latA2)[1], size(latB2)[1]])
-
-println([size(latA1_distorted)[1], size(latB1_distorted)[1], size(latA2)[1], size(latB2)[1]])
+n = minimum([size(latA1_distorted)[1], size(latB1_distorted)[1], size(latA2_distorted)[1], size(latB2_distorted)[1]])
 
 for i in 1:n
-    indAA, distAA = knn(treeA1, latA2[i,:], 1)
-    indBA, distBA = knn(treeB1, latA2[i,:], 1)
-    indAB, distAB = knn(treeA1, latB2[i,:], 1)
-    indBB, distBB = knn(treeB1, latB2[i,:], 1)
+    indAA, distAA = knn(treeA1, latA2_distorted[i,:], 1)
+    indBA, distBA = knn(treeB1, latA2_distorted[i,:], 1)
+    indAB, distAB = knn(treeA1, latB2_distorted[i,:], 1)
+    indBB, distBB = knn(treeB1, latB2_distorted[i,:], 1)
     if distAA[1] < tol
-        push!(AA, latA2[i,:])
+        push!(AA, latA2_distorted[i,:])
     end
     if distBA[1] < tol
-        push!(BA, latA2[i,:])
+        push!(BA, latA2_distorted[i,:])
     end
     if distAB[1] < tol
-        push!(AB, latB2[i,:])
+        push!(AB, latB2_distorted[i,:])
     end
     if distBB[1] < tol
-        push!(BB, latB2[i,:])
+        push!(BB, latB2_distorted[i,:])
     end
 end
 
@@ -217,24 +272,20 @@ max_radius = maximum(latA1_distorted) - 10.0
 
 try write_lattice(latAA, path*"/latticeAA_dist.dat", max_radius)
 catch e
-    # println("AA lattice is empty!")
     println(e)
 end
 
 try write_lattice(latBA, path*"/latticeBA_dist.dat", max_radius)
 catch e
-    # println("BA lattice is empty!")
     println(e)
 end
 
 try write_lattice(latAB, path*"/latticeAB_dist.dat", max_radius)
 catch e
-    # println("AB lattice is empty!")
     println(e)
 end
 
 try write_lattice(latBB, path*"/latticeBB_dist.dat", max_radius)
 catch e
-    # println("BB lattice is empty!")
     println(e)
 end

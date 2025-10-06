@@ -108,8 +108,8 @@ print("D = ", moire_period)
 # load data from the lattices
 latA1 = load_lattice(dataset_dirs[k] / "latticeA1_dist.dat")
 latB1 = load_lattice(dataset_dirs[k] / "latticeB1_dist.dat")
-latA2 = load_lattice(dataset_dirs[k] / "latticeA2.dat")
-latB2 = load_lattice(dataset_dirs[k] / "latticeB2.dat")
+latA2 = load_lattice(dataset_dirs[k] / "latticeA2_dist.dat")
+latB2 = load_lattice(dataset_dirs[k] / "latticeB2_dist.dat")
 
 latAA = load_lattice(dataset_dirs[k] / "latticeAA_dist.dat")
 latBA = load_lattice(dataset_dirs[k] / "latticeBA_dist.dat")
@@ -140,9 +140,9 @@ all_pts = np.concatenate((latA1, latB1, latA2, latB2))
 points_total = hv.Points(all_pts)
 
 min_x = -850
-max_x = 850
+max_x =  850
 min_y = -850
-max_y = 850
+max_y =  850
 f_width = max_x-min_x
 f_height = max_y-min_y
 moire = rasterize(points_total, width=f_width+100, height=f_height+100)
@@ -150,8 +150,8 @@ moire = moire.opts(
     cmap="blues",
     # colorbar=True,
     yaxis=None,
-    frame_width=f_width,
-    frame_height=f_height,
+    width=1500,
+    height=1500,
     xlim=(min_x, max_x),
     ylim=(min_y, max_y),
     title=angle_name,
@@ -160,16 +160,16 @@ moire = moire.opts(
 
 overlap = hv.Overlay([])
 if (latAB.size > 0):
-    pointsAB = hv.Points(latAB, label="AB").opts(size=10, color="purple")
+    pointsAB = hv.Points(latAB, label="AB").opts(size=15, color="purple")
     overlap *= pointsAB
 if (latBA.size > 0):
-    pointsBA = hv.Points(latBA, label="BA").opts(size=10, color="orange")
+    pointsBA = hv.Points(latBA, label="BA").opts(size=15, color="orange")
     overlap *= pointsBA
 if (latAA.size > 0):
-    pointsAA = hv.Points(latAA, label="AA").opts(size=10, color="green")
+    pointsAA = hv.Points(latAA, label="AA").opts(size=15, color="green")
     overlap *= pointsAA
 if (latBB.size > 0):
-    pointsBB = hv.Points(latBB, label="BB").opts(size=10, color="magenta")
+    pointsBB = hv.Points(latBB, label="BB").opts(size=15, color="magenta")
     overlap *= pointsBB
 
 circ1 = hv.Curve(circle_data).opts(color="gray")
@@ -180,4 +180,4 @@ overlap = overlap.opts(show_legend=True)
 
 full_image = moire * overlap
 hv.save(full_image, angle_name+".png", fmt="png", backend="bokeh")
-# trim(angle_name+".png", angle_name+".png")
+trim(angle_name+".png", angle_name+".png")
