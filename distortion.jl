@@ -122,19 +122,16 @@ sf = [s1, s2]
 
 # alpha_t1 = [1+s1, 0.0]
 # alpha_t2 = [0.0, 1+s2]
-
-alpha_t1 = [1+s1/2, 0.0]
-alpha_t2 = [0.0, 1+s2/2]
-
-alpha_t1_cart = cob_matrix * alpha_t1
-alpha_t2_cart = cob_matrix * alpha_t2
-
 # alpha_b1 = [1, 0.0]
 # alpha_b2 = [0.0, 1]
 
+alpha_t1 = [1+s1/2, 0.0]
+alpha_t2 = [0.0, 1+s2/2]
 alpha_b1 = [1-s1/2, 0.0]
 alpha_b2 = [0.0, 1-s2/2]
 
+alpha_t1_cart = cob_matrix * alpha_t1
+alpha_t2_cart = cob_matrix * alpha_t2
 alpha_b1_cart = cob_matrix * alpha_b1
 alpha_b2_cart = cob_matrix * alpha_b2
 

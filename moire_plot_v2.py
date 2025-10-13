@@ -176,8 +176,8 @@ circ1 = hv.Curve(circle_data).opts(color="gray")
 circ2 = hv.Curve(circle_data2).opts(color="gray")
 
 overlap = overlap * circ1 * circ2
-overlap = overlap.opts(show_legend=True)
 
 full_image = moire * overlap
+full_image.opts(legend_position="bottom_left")
 hv.save(full_image, angle_name+".png", fmt="png", backend="bokeh")
 trim(angle_name+".png", angle_name+".png")
