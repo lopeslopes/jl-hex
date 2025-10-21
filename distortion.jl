@@ -115,42 +115,47 @@ coord_lat_basis = inv_cob * AB_coord[min_index][1:2]
 sep_vec_decomp = inv_cob * AB_vec[min_index][1:2]
 m_coord = trunc(coord_lat_basis[1])
 n_coord = trunc(coord_lat_basis[2])
+# m_coord = coord_lat_basis[1]
+# n_coord = coord_lat_basis[2]
+println("m: ", m_coord)
+println("n: ", n_coord)
 
 s1 = sep_vec_decomp[1]/m_coord
 s2 = sep_vec_decomp[2]/n_coord
 sf = [s1, s2]
 
-# alpha_t1 = [1+s1, 0.0]
-# alpha_t2 = [0.0, 1+s2]
-# alpha_b1 = [1, 0.0]
-# alpha_b2 = [0.0, 1]
+# alpha_t1 = [1, 0.0]
+# alpha_t2 = [0.0, 1]
+# alpha_b1 = [1+s1, 0.0]
+# alpha_b2 = [0.0, 1+s2]
 
-alpha_t1 = [1+s1/2, 0.0]
-alpha_t2 = [0.0, 1+s2/2]
-alpha_b1 = [1-s1/2, 0.0]
-alpha_b2 = [0.0, 1-s2/2]
+alpha_t1 = [1-s1/2, 0.0]
+alpha_t2 = [0.0, 1-s2/2]
+alpha_b1 = [1+s1/2, 0.0]
+alpha_b2 = [0.0, 1+s2/2]
 
 alpha_t1_cart = cob_matrix * alpha_t1
 alpha_t2_cart = cob_matrix * alpha_t2
 alpha_b1_cart = cob_matrix * alpha_b1
 alpha_b2_cart = cob_matrix * alpha_b2
 
-println("a1 cartesian: ", a1_top)
-println("a2 cartesian: ", a2_top)
-
-println("Alpha t1 cartesian: ", alpha_t1_cart)
-println("Alpha t2 cartesian: ", alpha_t2_cart)
-println("Alpha b1 cartesian: ", alpha_b1_cart)
-println("Alpha b2 cartesian: ", alpha_b2_cart)
-
 len_alpha_t1 = sqrt(alpha_t1_cart[1]^2 + alpha_t1_cart[2]^2)
 len_alpha_t2 = sqrt(alpha_t2_cart[1]^2 + alpha_t2_cart[2]^2)
-println("Alpha t1 length: ", len_alpha_t1)
-println("Alpha t2 length: ", len_alpha_t2)
 len_alpha_b1 = sqrt(alpha_b1_cart[1]^2 + alpha_b1_cart[2]^2)
 len_alpha_b2 = sqrt(alpha_b2_cart[1]^2 + alpha_b2_cart[2]^2)
-println("Alpha b1 length: ", len_alpha_b1)
-println("Alpha b2 length: ", len_alpha_b2)
+
+println("a1  : ", a1_top)
+println("a2  : ", a2_top)
+
+println("\u03B1_t1: ", alpha_t1_cart)
+println("\u03B1_t1 length: ", len_alpha_t1)
+println("\u03B1_t2: ", alpha_t2_cart)
+println("\u03B1_t2 length: ", len_alpha_t2)
+println("\u03B1_b1: ", alpha_b1_cart)
+println("\u03B1_b1 length: ", len_alpha_b1)
+println("\u03B1_b2: ", alpha_b2_cart)
+println("\u03B1_b2 length: ", len_alpha_b2)
+
 ## ---------------------------------------
 
 ## DISTORTION 2 --------------------------
@@ -230,7 +235,7 @@ treeA1 = KDTree(transpose(latA1_distorted))
 treeB1 = KDTree(transpose(latB1_distorted))
 
 tol = 1.0e-3
-println("Tolerance:        ", tol)
+println("Tolerance: ", tol)
 name = @sprintf("%6.4f", tol)
 
 AA = []
@@ -269,20 +274,24 @@ max_radius = maximum(latA1_distorted) - 10.0
 
 try write_lattice(latAA, path*"/latticeAA_dist.dat", max_radius)
 catch e
-    println(e)
+    # println(e)
+    println("AA lattice is empty!")
 end
 
 try write_lattice(latBA, path*"/latticeBA_dist.dat", max_radius)
 catch e
-    println(e)
+    # println(e)
+    println("BA lattice is empty!")
 end
 
 try write_lattice(latAB, path*"/latticeAB_dist.dat", max_radius)
 catch e
-    println(e)
+    # println(e)
+    println("AB lattice is empty!")
 end
 
 try write_lattice(latBB, path*"/latticeBB_dist.dat", max_radius)
 catch e
-    println(e)
+    # println(e)
+    println("BB lattice is empty!")
 end
