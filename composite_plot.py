@@ -39,10 +39,13 @@ ax1.plot(angles, AA)
 ax1.plot(angles, AB, color="orange")
 # ax1.plot(angles, BB, color="red")
 
-for q in [61.0, 60.0, 59.0, 58.0]:
-    p = 1.0
-    magic_angle = (180/np.pi) * np.acos((3.0*(q**2) - (p**2))/(3.0*(q**2) + (p**2)))
-    ax1.axvline(magic_angle, color="black")
+current_angle = (180/np.pi) * 0.0190630
+ax1.axvline(current_angle, color="black")
+
+# for q in [61.0, 60.0, 59.0, 58.0]:
+#     p = 1.0
+#     magic_angle = (180/np.pi) * np.acos((3.0*(q**2) - (p**2))/(3.0*(q**2) + (p**2)))
+#     ax1.axvline(magic_angle, color="black")
 
 plt.xlabel(r"Ângulo (graus)")
 plt.ylabel(r"Separação ($\AA$)")
