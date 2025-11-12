@@ -185,6 +185,7 @@ rotate_point!(alpha_b2_cart, angle, [0.0, 0.0])
 HexUtils.create_honeycomb_lattice!(latA1_distorted, latB1_distorted, alpha_t1_cart, alpha_t2_cart, false)
 HexUtils.create_honeycomb_lattice!(latA2_distorted, latB2_distorted, alpha_b1_cart, alpha_b2_cart, false)
 ## ---------------------------------------
+max_radius = maximum(latA1_distorted) - 10.0
 
 ## DISTORTION METHOD 3 -------------------
 ## just to test if the program finds the
@@ -270,7 +271,6 @@ latAB = transpose(hcat(AB...))
 latBB = transpose(hcat(BB...))
 
 
-max_radius = maximum(latA1_distorted) - 10.0
 
 try write_lattice(latAA, path*"/latticeAA_dist.dat", max_radius)
 catch e
